@@ -6,10 +6,11 @@ import ProductCard from '../../components/ProductCard'
 
 function LandingPage() {
     const [openChat, setOpenChat] = useState(false)
+    console.log(openChat)
     return (
         <div className={openChat?'fixed top-0':'relative'}>
             <div onClick={()=>{setOpenChat(!openChat)}}
-            className='w-16 h-16 md:w-[calc(20px+4vw)] md:h-[calc(20px+4vw)] md:max-w-20 md:max-h-20 bg-[#ff8906] fixed right-7 bottom-7 md:right-15 md:bottom-15 rounded-full flex justify-center items-center z-10'>
+            className='w-16 h-16 md:w-[calc(20px+4vw)] md:h-[calc(20px+4vw)] md:max-w-20 md:max-h-20 bg-[#ff8906] fixed right-7 bottom-7 md:right-15 md:bottom-15 rounded-full flex justify-center items-center z-100'>
                 <MessageCircleMore color='#000' size={24} md:size={44} strokeWidth={'1.5px'} />
             </div>
 
