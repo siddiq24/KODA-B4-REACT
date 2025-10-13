@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Pencil, Trash2, Plus, Search, Filter, PencilLine, ReceiptText } from "lucide-react";
+import React, { useState } from "react";
+import {Trash2, Search, Filter, PencilLine, ReceiptText } from "lucide-react";
 import OrderSidebar from "../../components/OrderSidebar";
 
 const OrderList = () => {
@@ -71,11 +71,6 @@ const OrderList = () => {
         order.no_order.toLowerCase().includes(searchTerm.toLowerCase()) &&
         order.status.toLowerCase().includes(status.toLowerCase())
     );
-
-    const handleAdd = () => {
-        setEditData(null);
-        setIsSidebarOpen(true);
-    };
 
     const handleEdit = (order) => {
         setEditData(order);
