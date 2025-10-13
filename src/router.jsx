@@ -14,6 +14,7 @@ import Dashboard from './pages/admin/Dashboard'
 import { CupSoda, Handbag, LayoutDashboard, LogOut, Users } from 'lucide-react'
 import ProductList from './pages/admin/ProductList'
 import OrderList from './pages/admin/OrderList'
+import UserList from './pages/admin/UserList'
 
 function AppRouter() {
     return (
@@ -36,7 +37,7 @@ function AppRouter() {
                         <Route path='dashboard' element={<Dashboard />} />
                         <Route path='product' element={<ProductList />} />
                         <Route path='order' element={<OrderList />} />
-                        <Route path='user' element={<Dashboard />} />
+                        <Route path='user' element={<UserList />} />
                     </Route>
                 </Route>
             </Routes>
