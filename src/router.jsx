@@ -12,6 +12,8 @@ import DetailOrder from './pages/order/DetailOrder'
 import Profile from './pages/profile/Profile'
 import Dashboard from './pages/admin/Dashboard'
 import { CupSoda, Handbag, LayoutDashboard, LogOut, Users } from 'lucide-react'
+import ProductList from './pages/admin/ProductList'
+import OrderList from './pages/admin/OrderList'
 
 function AppRouter() {
     return (
@@ -32,10 +34,8 @@ function AppRouter() {
                     <Route path='profile' element={<Profile />} />
                     <Route path='/admin' element={<AdminLayout />} >
                         <Route path='dashboard' element={<Dashboard />} />
-                        <Route path='product' >
-                            <Route path='' element={<Dashboard />} />
-                        </Route>
-                        <Route path='order' element={<Dashboard />} />
+                        <Route path='product' element={<ProductList />} />
+                        <Route path='order' element={<OrderList />} />
                         <Route path='user' element={<Dashboard />} />
                     </Route>
                 </Route>
@@ -102,9 +102,9 @@ const AdminLayout = () => {
     return (
         <div className='relative'>
             <Navbar isOpen={isOpen} setIsOpen={setIsOpen} />
-            <div className='w-full pt-25 h-screen overflow-hidden'>
-                <div className='flex h-full'>
-                    <nav className='w-[20%] border pt-10 border-gray-200 h-full lg:px-[4%] px-3 space-y-2 hidden md:block'>
+            <div className='relative w-full pt-25 h-screen overflow-hidden'>
+                <div className='flex h-full relative'>
+                    <nav className='w-[20%] border pt-10 border-gray-200 h-full lg:pl-[4%] px-3 space-y-2 hidden md:block'>
                         {nav.map((n, i) => {
                             const isActive = location.pathname === n.link
                             return (
@@ -119,7 +119,7 @@ const AdminLayout = () => {
                             )
                         })}
                     </nav>
-                    <main className='pl-10 pr-[5%] pt-10 w-full h-full overflow-y-scroll'>
+                    <main className='relative pl-10 pr-[5%] pt-10 w-full h-full'>
                         <Outlet />
                     </main>
                 </div>
