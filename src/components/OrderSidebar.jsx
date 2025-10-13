@@ -22,33 +22,6 @@ const OrderSidebar = ({ isOpen, onClose, productData = {
         setStatus(productData.status)
     }, [productData])
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
-
-    // const toggleSize = (size) => {
-    //     setFormData((prev) => ({
-    //         ...prev,
-    //         size: prev.size.includes(size)
-    //             ? prev.size.filter((s) => s !== size)
-    //             : [...prev.size, size],
-    //     }));
-    // };
-
-    // const handleImageUpload = (e) => {
-    //     const files = Array.from(e.target.files);
-    //     const urls = files.map((file) => URL.createObjectURL(file));
-    //     setFormData({ ...formData, images: [...formData.images, ...urls] });
-    // };
-
-    // const handleImageDelete = (url) => {
-    //     setFormData({
-    //         ...formData,
-    //         images: formData.images.filter((img) => img !== url),
-    //     });
-    // };
-
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
@@ -153,6 +126,12 @@ const OrderSidebar = ({ isOpen, onClose, productData = {
                         }
                     </div>
                 </section>
+                <button
+                    onClick={handleSubmit}
+                    className="text-center w-full p-4 text-xl rounded-lg bg-[#ff8906] mt-4"
+                >
+                    Update
+                </button>
             </div>
         </div>
     );
