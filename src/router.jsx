@@ -15,6 +15,7 @@ import { CupSoda, Handbag, LayoutDashboard, LogOut, Users } from 'lucide-react'
 import ProductList from './pages/admin/ProductList'
 import OrderList from './pages/admin/OrderList'
 import UserList from './pages/admin/UserList'
+import Login from './pages/auth/Login'
 
 function AppRouter() {
     return (
@@ -22,6 +23,7 @@ function AppRouter() {
             <Routes>
                 <Route path='/auth' element={<Outlet />}>
                     <Route path='register' element={<Register />} />
+                    <Route path='login' element={<Login />} />
                 </Route>
                 <Route path='/' element={<Layout />}>
                     <Route path='' element={<LandingPage />} />

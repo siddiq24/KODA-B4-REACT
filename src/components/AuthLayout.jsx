@@ -6,7 +6,7 @@ function AuthLayout({ children, img }) {
       <section className='md:flex-4'>
         <img src={img} alt="" className='object-center h-full md:h-fit object-cover' />
       </section>
-      <section className='absolute md:relative inset-10 md:inset-0 bg-white rounded-lg md:flex-6 p-8'>
+      <section className='absolute md:relative inset-10 md:inset-0 bg-white rounded-lg md:flex-6 py-4 px-[5%]'>
         {children}
       </section>
     </div>
