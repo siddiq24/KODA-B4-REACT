@@ -16,6 +16,7 @@ import ProductList from './pages/admin/ProductList'
 import OrderList from './pages/admin/OrderList'
 import UserList from './pages/admin/UserList'
 import Login from './pages/auth/Login'
+import ForgotPassword from './pages/auth/ForgotPassword'
 
 function AppRouter() {
     return (
@@ -24,6 +25,7 @@ function AppRouter() {
                 <Route path='/auth' element={<Outlet />}>
                     <Route path='register' element={<Register />} />
                     <Route path='login' element={<Login />} />
+                    <Route path='forgot-password' element={<ForgotPassword />} />
                 </Route>
                 <Route path='/' element={<Layout />}>
                     <Route path='' element={<LandingPage />} />

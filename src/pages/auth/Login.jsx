@@ -33,9 +33,12 @@ function Login() {
                             <Eye className='m-4 stroke-1' />
                         </div>
                     </div>
+                    <div className='w-full flex justify-end'>
+                        <Link to={'/auth/forgot-password'} className='text-[#ff8906] '>Lupa Password?</Link>
+                    </div>
                     <button className='p-4 bg-[#ff8906] w-full rounded-lg text-lg'>Login</button>
                 </form>
-                <p className='text-center text-gray-500'>Have an Account?
+                <p className='text-center text-gray-500'>No Have an Account?
                     <Link to={'/auth/register'} className='text-[#ff8906]'> Register</Link>
                 </p>
                 <div className='relative py-4 text-center'>
