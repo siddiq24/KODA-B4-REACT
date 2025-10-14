@@ -1,10 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 import AuthLayout from '../../components/AuthLayout'
 import { Facebook, Google, Logo } from '../../svg/svg'
 import { Eye, KeyRound, Mail, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
+import axios from 'axios'
 
 function Login() {
+    const [form, setForm] = useState({ email: "", password: '' })
+    function handleChange(e) {
+        const { name, value } = e.target
+        setForm({ ...form, [name]: value })
+    }
+
+    function handleSubmit() {
+        (async () => {
+            try {
+                const res = await axios.get('http://localhost:3000/users')
+                const users = res.data
+                const user = users.find(user => {
+                    return user.email == form.email &&
+                        user.password == form.password
+                })
+                user && console.log(user)
+            } catch (error) {
+                console.log(error)
+            }
+        })()
+    }
+
     return (
         <AuthLayout img={'/login.jpg'}>
             <div className='h-full flex flex-col justify-center gap-8'>
@@ -15,8 +38,12 @@ function Login() {
                     <label htmlFor="" className='text-xl'>Email</label>
                     <div className='relative w-full mt-3 flex items-center'>
                         <input
+                            id='email'
+                            name='email'
                             type="text"
                             placeholder='Enter Your Email'
+                            value={form.email}
+                            onChange={handleChange}
                             className='w-full absolute p-3 rounded-lg pl-14 outline outline-gray-300 text-lg'
                         />
                         <Mail className='m-4 text-gray-500' />
@@ -24,8 +51,12 @@ function Login() {
                     <label htmlFor="" className='text-xl'>Password</label>
                     <div className='relative w-full mt-3 flex items-center justify-between'>
                         <input
+                            id='password'
+                            name='password'
                             type="text"
                             placeholder='Enter Your Password'
+                            value={form.password}
+                            onChange={handleChange}
                             className='w-full absolute p-3 rounded-lg pl-14 outline outline-gray-300 text-lg'
                         />
                         <KeyRound className='m-4 text-gray-500' />
@@ -36,7 +67,11 @@ function Login() {
                     <div className='w-full flex justify-end'>
                         <Link to={'/auth/forgot-password'} className='text-[#ff8906] '>Lupa Password?</Link>
                     </div>
-                    <button className='p-4 bg-[#ff8906] w-full rounded-lg text-lg'>Login</button>
+                    <button onClick={(e) => {
+                        e.preventDefault()
+                        handleSubmit()
+                    }}
+                        className='p-4 bg-[#ff8906] w-full rounded-lg text-lg'>Login</button>
                 </form>
                 <p className='text-center text-gray-500'>No Have an Account?
                     <Link to={'/auth/register'} className='text-[#ff8906]'> Register</Link>
