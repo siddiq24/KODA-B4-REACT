@@ -17,10 +17,12 @@ import OrderList from './pages/admin/OrderList'
 import UserList from './pages/admin/UserList'
 import Login from './pages/auth/Login'
 import ForgotPassword from './pages/auth/ForgotPassword'
+import { ToastContainer } from 'react-toastify'
 
 function AppRouter() {
     return (
         <BrowserRouter>
+            <ToastContainer />
             <Routes>
                 <Route path='/auth' element={<Outlet />}>
                     <Route path='register' element={<Register />} />

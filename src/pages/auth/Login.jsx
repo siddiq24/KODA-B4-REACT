@@ -2,30 +2,31 @@ import React, { useState } from 'react'
 import AuthLayout from '../../components/AuthLayout'
 import { Facebook, Google, Logo } from '../../svg/svg'
 import { Eye, KeyRound, Mail, UserRound } from 'lucide-react'
-import { Link } from 'react-router'
-import axios from 'axios'
+import { Link, useNavigate } from 'react-router'
+import { useDispatch, useSelector } from 'react-redux'
+import { login } from '../../redux/slice/AuthSlice'
 
 function Login() {
     const [form, setForm] = useState({ email: "", password: '' })
+    const dispatch = useDispatch()
+    const { user } = useSelector(state => state.auth)
+    const navigate = useNavigate()
+
     function handleChange(e) {
         const { name, value } = e.target
         setForm({ ...form, [name]: value })
     }
 
     function handleSubmit() {
-        (async () => {
-            try {
-                const res = await axios.get('http://localhost:3000/users')
-                const users = res.data
-                const user = users.find(user => {
-                    return user.email == form.email &&
-                        user.password == form.password
-                })
-                user && console.log(user)
-            } catch (error) {
-                console.log(error)
-            }
-        })()
+        dispatch(login(form))
+        console.log(user.role)
+        setTimeout(() => {
+            user.role === 'admin'
+                ? navigate('/admin/dashboard', {replace: true})
+                : user.role === 'user'
+                    ? navigate('/product', {replace: true})
+                    : navigate('/')
+        }, 1000);
     }
 
     return (
