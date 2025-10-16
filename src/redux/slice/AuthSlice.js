@@ -8,12 +8,20 @@ const initialState = {
 
 export const register = createAsyncThunk(
     "auth/register",
-    async(form) =>{
+    async (user) => {
         try {
-            await axios.post(`${import.meta.env.VITE_BASE_URL}/users`, {form})
+            console.log("Data register:", user)
+            const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/users`, {
+                full_name: user.full_name,
+                email: user.email,
+                password: user.password,
+                role: 'user'
+            })
+            console.log("Respon register:", res.data)
+            return res.data
         } catch (error) {
-            console.log(error)
-            throw new Error(error)
+            console.error("Register error:", error.message)
+            throw error
         }
     }
 )
@@ -22,13 +30,17 @@ export const login = createAsyncThunk(
     "auth/login",
     async (form) => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users?email=${form.email}`)
-            const user = res.data
-            
-            return user
+            const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users?email=${form.email}&password=${form.password}`)
+            const users = res.data
+
+            if (users.length === 0) {
+                throw new Error("Email atau password salah")
+            }
+
+            return users[0]
         } catch (error) {
-            console.log(Error.message)
-            throw new Error(error)
+            console.error("Login error:", error.message)
+            throw error
         }
     }
 )
@@ -37,6 +49,7 @@ export const logout = createAsyncThunk(
     "auth/logout",
     async () => {
         localStorage.removeItem('persist:root')
+        return null
     }
 )
 
@@ -46,22 +59,35 @@ export const authSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(login.pending, (state) => {
-                state.isLoading = true;
+            // Register
+            .addCase(register.pending, (state) => {
+                state.isLoading = true
             })
-            .addCase(login.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.user = action.payload;
+            .addCase(register.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.user = action.payload
             })
-            .addCase(login.rejected, (state) => {
-                state.isLoading = false;
+            .addCase(register.rejected, (state) => {
+                state.isLoading = false
             })
 
+            // Login
+            .addCase(login.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(login.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.user = action.payload
+            })
+            .addCase(login.rejected, (state) => {
+                state.isLoading = false
+            })
+
+            // Logout
             .addCase(logout.fulfilled, (state) => {
                 state.user = null
             })
     }
 })
 
-
-export default authSlice.reducer;
+export default authSlice.reducer

@@ -1,25 +1,32 @@
 {
-    "users": [
-        {
-            "id": 1,
-            "name": "Sidik Wisnu",
-            "email": "siddiqrm24@gmail.com",
-            "password": "Password24.",
-            "role": "admin"
-        }
-    ],
-    "products": [
-        {
-            "id": 1,
-            "name": "Laptop",
-            "price": 700
-        }
-    ],
-    "promos": [
-        {
-            "id": 1,
-            "title": "Diskon Akhir Tahun",
-            "discount": 20
-        }
-    ]
+  "users": [
+    {
+      "id": "1",
+      "full_name": "Sidik Wisnu",
+      "email": "siddiqrm24@gmail.com",
+      "password": "Password24.",
+      "role": "user"
+    },
+    {
+      "id": "9d91",
+      "full_name": "Sidique",
+      "email": "sidique@yuhu.com",
+      "password": "User321`",
+      "role": "user"
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "Laptop",
+      "price": 700
+    }
+  ],
+  "promos": [
+    {
+      "id": "1",
+      "title": "Diskon Akhir Tahun",
+      "discount": 20
+    }
+  ]
 }
