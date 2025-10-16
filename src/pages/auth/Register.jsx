@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import AuthLayout from '../../components/AuthLayout'
 import { Facebook, Google, Logo } from '../../svg/svg'
-import { Eye, KeyRound, Mail, UserRound } from 'lucide-react'
+import { Eye, EyeClosed, KeyRound, Mail, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { validateEmail, validatePassword } from '../../utils/validateInput'
 import { useDispatch } from 'react-redux'
-import { register } from '../../redux/slice/AuthSlice'
+import { login, register } from '../../redux/slice/AuthSlice'
 
 function Register() {
     const [form, setForm] = useState({
@@ -19,6 +19,8 @@ function Register() {
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
     const dispatch = useDispatch()
+    const [passA, setPassA] = useState(false)
+    const [passB, setPassB] = useState(false)
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -27,6 +29,7 @@ function Register() {
 
     const handleClick = async (e) => {
         e.preventDefault()
+        setLoading(true)
 
         if (!validateEmail(form.email)) return
         if (!validatePassword(form.password)) return
@@ -39,7 +42,6 @@ function Register() {
             return toast('Passwords do not match', { type: 'error', theme: 'dark' })
         }
 
-        setLoading(true)
         try {
             const user = (await axios.get(`${import.meta.env.VITE_BASE_URL}/users?email=${form.email}`)).data
 
@@ -47,6 +49,7 @@ function Register() {
                 if (user[0].password == form.password) {
                     toast('Login Successfull', { type: 'success', theme: 'dark' })
                     navigate('/products', { replace: true })
+                    dispatch(login(user))
                     return
                 }
                 navigate('/auth/login', { replace: true })
@@ -103,12 +106,23 @@ function Register() {
                         <input
                             onChange={handleChange}
                             name="password"
-                            type="password"
+                            type={passA ? 'text' : 'password'}
                             placeholder="Enter Your Password"
                             autoComplete="off"
                             className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 text-lg"
                         />
-                        <Eye className="absolute right-4 text-gray-500" />
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault()
+                                setPassA(!passA)
+                            }}
+                            className='absolute right-4'
+                        >
+                            {passA
+                                ? <Eye className=" text-gray-500" />
+                                : <EyeClosed className="text-gray-500" />
+                            }
+                        </button>
                     </div>
 
                     <label className="text-xl">Confirm Password</label>
@@ -117,19 +131,30 @@ function Register() {
                         <input
                             onChange={handleChange}
                             name="conf_password"
-                            type="password"
+                            type={passA ? 'text' : 'password'}
                             placeholder="Enter Your Password Again"
                             autoComplete="off"
                             className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 text-lg"
                         />
-                        <Eye className="absolute right-4 text-gray-500" />
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault()
+                                setPassB(!passB)
+                            }}
+                            className='absolute right-4'
+                        >
+                            {passB
+                                ? <Eye className=" text-gray-500" />
+                                : <EyeClosed className="text-gray-500" />
+                            }
+                        </button>
                     </div>
 
                     <button
                         onClick={handleClick}
                         type="submit"
                         disabled={loading}
-                        className="p-4 bg-[#ff8906] w-full rounded-lg text-lg text-white hover:bg-[#e67c04] transition"
+                        className="p-4 bg-[#ff8906] relative w-full rounded-lg text-lg text-white hover:bg-[#e67c04] transition"
                     >
                         {loading ? 'Registering...' : 'Register'}
                     </button>
