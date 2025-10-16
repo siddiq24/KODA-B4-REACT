@@ -1,9 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Logo } from '../svg/svg'
 import { Hamburger, HamburgerIcon, Menu, Search, ShoppingCart } from 'lucide-react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
+import { useDispatch, useSelector } from 'react-redux'
+import { logout } from '../redux/slice/AuthSlice'
 
 function Navbar({ isOpen, setIsOpen }) {
+    const [click, setClick] = useState(false)
+    const navigate = useNavigate()
+    const { user } = useSelector(state => state.auth)
     return (
         <div className='w-full flex p-3 px-5 fixed backdrop-brightness-50 backdrop-blur-md z-3 md:px-[5%] lg:px-[6%] md:py-6'>
             <div className='flex gap-3 md:w-[45%] justify-between items-center md:min-w-88'>
@@ -34,12 +39,49 @@ function Navbar({ isOpen, setIsOpen }) {
                 >
                     <Menu color='#fff' strokeWidth={1} size={30} />
                 </div>
-                <button className='hidden md:block w-fit md:max-w-30 md:text-sm lg:text-xl lg:px-6 lg:py-3 md:px-4 md:py-2 text-nowrap border border-white text-white rounded-lg p-4'>Sign In</button>
-                <button className='hidden md:block w-fit md:max-w-30 md:text-sm lg:text-xl lg:px-6 lg:py-3 md:px-4 md:py-2 text-nowrap border border-[#ff8906] rounded-lg p-4 bg-[#ff8906]'>Sign Up</button>
+
+                {
+                    user
+                        ? <div onClick={() => { setClick(!click) }}
+                            className='relative'
+                        >
+                            <img src={user.image || 'https://i.pinimg.com/736x/f0/65/5f/f0655f2737da76be9b4ac435c65e3d9b.jpg'} alt=""
+                                className='size-20 border border-white/20 rounded-full object-center object-cover'
+                            />
+                            {click && <Button />}
+                        </div>
+                        : <div className={`flex gap-4`}>
+                            <button onClick={() => { navigate('/auth/login') }} className='hidden md:block w-fit md:max-w-30 md:text-sm lg:text-xl lg:px-6 lg:py-3 md:px-4 md:py-2 text-nowrap border border-white text-white rounded-lg p-4'>Sign In</button>
+                            <button onClick={() => { navigate('/auth/register') }} className='hidden md:block w-fit md:max-w-30 md:text-sm lg:text-xl lg:px-6 lg:py-3 md:px-4 md:py-2 text-nowrap border border-[#ff8906] rounded-lg p-4 bg-[#ff8906]'>Sign Up</button>
+                        </div>
+                }
             </div>
 
         </div>
     )
 }
 
+function Button() {
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+    return (
+        <div className='w-full h-14 top-[110%] absolute flex justify-center '>
+            <div className='bg-white w-fit h-fit p-2 rounded-lg space-y-2'>
+                <button
+                    onClick={()=>{
+                        navigate('/profile')
+                    }}
+                    className='bg-[#ff8906] w-full text-xl rounded-lg text-nowrap p-2 px-8'
+                >Profile</button>
+                <button
+                    onClick={()=>{
+                        dispatch(logout())
+                        navigate('/')
+                    }}
+                    className='bg-red-500 w-full text-xl rounded-lg text-nowrap p-2 px-8 text-white'
+                >Log Out</button>
+            </div>
+        </div>
+    )
+}
 export default Navbar
