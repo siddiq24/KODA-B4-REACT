@@ -15,7 +15,8 @@ export const register = createAsyncThunk(
                 full_name: user.full_name,
                 email: user.email,
                 password: user.password,
-                role: 'user'
+                role: 'user',
+                image: 'https://i.pinimg.com/736x/f0/65/5f/f0655f2737da76be9b4ac435c65e3d9b.jpg'
             })
             console.log("Respon register:", res.data)
             return res.data
