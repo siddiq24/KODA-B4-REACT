@@ -70,13 +70,13 @@ function Register() {
 
     return (
         <AuthLayout img={'/register.jpg'}>
-            <div className="h-full flex flex-col justify-center gap-8">
+            <div className="h-full flex flex-col justify-center gap-4 md:gap-8 text-sm md:text-md">
                 <Logo w={150} h={50} color={'#8E6447'} />
                 <form className="space-y-4">
-                    <h1 className="text-3xl text-[#8E6447] font-semibold">Register</h1>
+                    <h1 className=" text-2xl md:text-3xl text-[#8E6447] font-semibold">Register</h1>
                     <p className="text-gray-500">Fill out the form correctly</p>
 
-                    <label className="text-xl">Full Name</label>
+                    <label className="md:text-xl">Full Name</label>
                     <div className="relative flex items-center">
                         <UserRound className="absolute left-4 text-gray-500" />
                         <input
@@ -84,11 +84,11 @@ function Register() {
                             name="full_name"
                             type="text"
                             placeholder="Enter Your Full Name"
-                            className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 text-lg"
+                            className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 md:text-lg"
                         />
                     </div>
 
-                    <label className="text-xl">Email</label>
+                    <label className="md:text-xl">Email</label>
                     <div className="relative flex items-center">
                         <Mail className="absolute left-4 text-gray-500" />
                         <input
@@ -96,11 +96,11 @@ function Register() {
                             name="email"
                             type="email"
                             placeholder="Enter Your Email"
-                            className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 text-lg"
+                            className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 md:text-lg"
                         />
                     </div>
 
-                    <label className="text-xl">Password</label>
+                    <label className="md:text-xl">Password</label>
                     <div className="relative flex items-center">
                         <KeyRound className="absolute left-4 text-gray-500" />
                         <input
@@ -109,7 +109,7 @@ function Register() {
                             type={passA ? 'text' : 'password'}
                             placeholder="Enter Your Password"
                             autoComplete="off"
-                            className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 text-lg"
+                            className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 md:text-lg"
                         />
                         <button
                             onClick={(e) => {
@@ -125,7 +125,7 @@ function Register() {
                         </button>
                     </div>
 
-                    <label className="text-xl">Confirm Password</label>
+                    <label className="md:text-xl">Confirm Password</label>
                     <div className="relative flex items-center">
                         <KeyRound className="absolute left-4 text-gray-500" />
                         <input
@@ -134,7 +134,7 @@ function Register() {
                             type={passA ? 'text' : 'password'}
                             placeholder="Enter Your Password Again"
                             autoComplete="off"
-                            className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 text-lg"
+                            className="w-full p-3 pl-14 rounded-lg outline outline-gray-300 md:text-lg"
                         />
                         <button
                             onClick={(e) => {
@@ -154,7 +154,7 @@ function Register() {
                         onClick={handleClick}
                         type="submit"
                         disabled={loading}
-                        className="p-4 bg-[#ff8906] relative w-full rounded-lg text-lg text-white hover:bg-[#e67c04] transition"
+                        className="p-2 md:p-4 bg-[#ff8906] relative w-full rounded-lg text-lg text-white hover:bg-[#e67c04] transition"
                     >
                         {loading ? 'Registering...' : 'Register'}
                     </button>
