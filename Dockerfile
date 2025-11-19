@@ -1,6 +1,8 @@
-FROM node:19-alpine AS builder
+FROM node:23-alpine AS builder
 
 WORKDIR /app
+
+RUN apk add --no-cache libc6-compat
 
 ARG VITE_BASE_URL
 ENV VITE_BASE_URL=$VITE_BASE_URL
