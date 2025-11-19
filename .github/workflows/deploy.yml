@@ -64,7 +64,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker compose -f /home/sidik/frontend down -v
-            docker compose -f /home/sidik/frontend pull
-            docker compose -f /home/sidik/frontend up -d
-            docker system prune -af --volumes
+            docker compose -f /home/sidik/frontend/docker-compose.yaml down -v
+            docker compose -f /home/sidik/frontend/docker-compose.yaml up -d --build
