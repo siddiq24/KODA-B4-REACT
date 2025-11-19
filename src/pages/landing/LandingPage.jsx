@@ -1,22 +1,28 @@
-import React, { useState } from 'react'
-import { Checklist, Map } from '../../svg/svg'
-import { ChevronLeft, ChevronRight, CircleCheck, MessageCircleMore, MoveLeft, MoveRight, ShoppingCart, Star } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Map } from '../../svg/svg'
+import { ChevronLeft, ChevronRight, CircleCheck, MessageCircleMore, Star } from 'lucide-react'
 import Chat from '../../components/landing/Chat'
 import ProductCard from '../../components/ProductCard'
+import axios from 'axios'
 
 function LandingPage() {
     const [openChat, setOpenChat] = useState(false)
-    console.log(openChat)
+    useEffect(() => {
+        (async () => {
+            let ress = await axios.get(import.meta.env.VITE_BASE_URL)
+            console.log(ress.data);
+        })()
+    })
     return (
-        <div className={openChat?'fixed top-0':'relative'}>
-            <div onClick={()=>{setOpenChat(!openChat)}}
-            className='w-16 h-16 md:w-[calc(20px+4vw)] md:h-[calc(20px+4vw)] md:max-w-20 md:max-h-20 bg-[#ff8906] fixed right-7 bottom-7 md:right-15 md:bottom-15 rounded-full flex justify-center items-center z-100'>
+        <div className={openChat ? 'fixed top-0' : 'relative'}>
+            <div onClick={() => { setOpenChat(!openChat) }}
+                className='w-16 h-16 md:w-[calc(20px+4vw)] md:h-[calc(20px+4vw)] md:max-w-20 md:max-h-20 bg-[#ff8906] fixed right-7 bottom-7 md:right-15 md:bottom-15 rounded-full flex justify-center items-center z-100'>
                 <MessageCircleMore color='#000' size={24} md:size={44} strokeWidth={'1.5px'} />
             </div>
 
             <section className='relative  md:flex flex-row-reverse min-h-screen md:h-screen'>
                 <div className='md:relative h-[50vh] md:h-auto md:w-[50%] bg-[url(/home.jpg)] bg-cover bg-center'>
-                    <Chat isOpen={openChat}/>
+                    <Chat isOpen={openChat} />
                 </div>
                 <div className='py-8 px-6 min-h-[50vh] md:w-[50%] bg-gradient-to-b from-black/80 to-black/100 md:h-full flex items-center md:px-[5%] lg:px-[6%]'>
                     <div className='text-white space-y-6 md:space-y-8'>
@@ -43,7 +49,7 @@ function LandingPage() {
 
             <section className='md:flex flex-row-reverse md:h-[50vw] min-h-screen'>
                 <div className='md:w-[50%]'>
-                    <img src="/barista.jpg" alt="Barista" className='w-full h-100 md:h-[70%] object-cover object-[0%_20%]' />
+                    <img src={`/barista.jpg`} alt="Barista" className='w-full h-100 md:h-[70%] object-cover object-[0%_20%]' />
                 </div>
                 <div className='py-8 px-6 md:w-[50%] flex items-center md:px-[5%] lg:px-[7vw]'>
                     <div className='space-y-6 md:space-y-8'>
@@ -81,7 +87,7 @@ function LandingPage() {
                 </div>
 
                 <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
-                    <ProductCard/>
+                    <ProductCard />
                 </div>
             </section>
 

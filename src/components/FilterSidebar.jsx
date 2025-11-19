@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function FilterSidebar() {
+export default function FilterSidebar({className}) {
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("Coffee");
     const [selectedSort, setSelectedSort] = useState("Flash sale");
@@ -40,7 +40,7 @@ export default function FilterSidebar() {
     };
 
     return (
-        <div className="hidden md:block rounded-3xl flex-1 bg-black text-white h-fit p-6 space-y-6">
+        <div className={`rounded-3xl flex-1 bg-black text-white h-fit p-6 space-y-6 ${className}`}>
             <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold">Filter</h2>
                 <button onClick={handleReset} className="text-lg text-red-400 hover:text-white">
@@ -111,7 +111,7 @@ export default function FilterSidebar() {
                             max={max}
                             value={range[0]}
                             onChange={handleMinChange}
-                            className="absolute w-full -bottom-2 appearance-none bg-transparent pointer-events-none z-1 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-orange-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-8 [&::-moz-range-thumb]:h-8 [&::-moz-range-thumb]:bg-orange-500 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:pointer-events-auto"
+                            className="cursor-pointer absolute w-full -bottom-2 appearance-none bg-transparent pointer-events-none z-1 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-orange-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-8 [&::-moz-range-thumb]:h-8 [&::-moz-range-thumb]:bg-orange-500 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:pointer-events-auto"
                         />
                         <input
                             type="range"
@@ -119,7 +119,7 @@ export default function FilterSidebar() {
                             max={max}
                             value={range[1]}
                             onChange={handleMaxChange}
-                            className="absolute w-full -bottom-2  appearance-none bg-transparent pointer-events-none z-1 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-orange-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-8 [&::-moz-range-thumb]:h-8 [&::-moz-range-thumb]:bg-orange-500 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:pointer-events-auto"
+                            className="cursor-pointer absolute w-full -bottom-2  appearance-none bg-transparent pointer-events-none z-1 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-orange-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-8 [&::-moz-range-thumb]:h-8 [&::-moz-range-thumb]:bg-orange-500 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:pointer-events-auto"
                         />
                     </div>
                 </div>

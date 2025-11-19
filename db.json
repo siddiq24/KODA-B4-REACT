@@ -3,23 +3,96 @@
     {
       "id": "1",
       "full_name": "Sidik Wisnu",
+      "image": "https://i.pinimg.com/736x/e1/b4/5f/e1b45f2eff80b32b4d6caad04c33f0ec.jpg",
       "email": "siddiqrm24@gmail.com",
       "password": "Password24.",
-      "role": "user"
-    },
-    {
-      "id": "9d91",
-      "full_name": "Sidique",
-      "email": "sidique@yuhu.com",
-      "password": "User321`",
       "role": "user"
     }
   ],
   "products": [
     {
       "id": "1",
-      "name": "Laptop",
-      "price": 700
+      "title": "Hazelnut Latte",
+      "desc": "A smooth blend of espresso, steamed milk, and hazelnut syrup that delivers a nutty and comforting flavor.",
+      "rate": 4.8,
+      "price": 35000,
+      "discount": 0.1,
+      "image": "https://i.pinimg.com/1200x/f0/65/5f/f0655f2737da76be9b4ac435c65e3d9b.jpg",
+      "images": [
+        "https://i.pinimg.com/1200x/f0/65/5f/f0655f2737da76be9b4ac435c65e3d9b.jpg",
+        "https://i.pinimg.com/1200x/f0/65/5f/f0655f2737da76be9b4ac435c65e3d9b.jpg",
+        "https://i.pinimg.com/1200x/f0/65/5f/f0655f2737da76be9b4ac435c65e3d9b.jpg"
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Vanilla Cappuccino",
+      "desc": "Classic cappuccino with a sweet hint of vanilla, topped with creamy milk foam for a smooth finish.",
+      "rate": 4.6,
+      "price": 32000,
+      "discount": 0.15,
+      "image": "https://i.pinimg.com/736x/4d/e4/0c/4de40c8bbd7ca5c9a76587faf386d444.jpg",
+      "images": [
+        "https://i.pinimg.com/736x/4d/e4/0c/4de40c8bbd7ca5c9a76587faf386d444.jpg",
+        "https://i.pinimg.com/736x/4d/e4/0c/4de40c8bbd7ca5c9a76587faf386d444.jpg",
+        "https://i.pinimg.com/736x/4d/e4/0c/4de40c8bbd7ca5c9a76587faf386d444.jpg"
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Caramel Macchiato",
+      "desc": "Layers of steamed milk, rich espresso, and caramel drizzle that create a delightful balance of sweetness and strength.",
+      "rate": 4.9,
+      "price": 40000,
+      "discount": 0.2,
+      "image": "https://i.pinimg.com/1200x/b1/8d/50/b18d50fa62686644792732a3f609275f.jpg",
+      "images": [
+        "https://i.pinimg.com/1200x/b1/8d/50/b18d50fa62686644792732a3f609275f.jpg",
+        "https://i.pinimg.com/1200x/b1/8d/50/b18d50fa62686644792732a3f609275f.jpg",
+        "https://i.pinimg.com/1200x/b1/8d/50/b18d50fa62686644792732a3f609275f.jpg"
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Matcha Latte",
+      "desc": "Creamy matcha green tea blended with fresh milk for a refreshing and antioxidant-rich experience.",
+      "rate": 4.7,
+      "price": 38000,
+      "discount": null,
+      "image": "https://i.pinimg.com/1200x/0b/1e/33/0b1e33aacaeda61bcff8918b9d7a56cb.jpg",
+      "images": [
+        "https://i.pinimg.com/1200x/0b/1e/33/0b1e33aacaeda61bcff8918b9d7a56cb.jpg",
+        "https://i.pinimg.com/1200x/0b/1e/33/0b1e33aacaeda61bcff8918b9d7a56cb.jpg",
+        "https://i.pinimg.com/1200x/0b/1e/33/0b1e33aacaeda61bcff8918b9d7a56cb.jpg"
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Cold Brew Coffee",
+      "desc": "Slow-steeped coffee served cold, with a naturally sweet flavor and smooth finish — perfect for a hot day.",
+      "rate": 4.5,
+      "price": 30000,
+      "discount": 0.05,
+      "image": "https://i.pinimg.com/1200x/d1/0e/53/d10e5308013309b6a8fe5202cdd46a0a.jpg",
+      "images": [
+        "https://i.pinimg.com/1200x/d1/0e/53/d10e5308013309b6a8fe5202cdd46a0a.jpg",
+        "https://i.pinimg.com/1200x/d1/0e/53/d10e5308013309b6a8fe5202cdd46a0a.jpg",
+        "https://i.pinimg.com/1200x/d1/0e/53/d10e5308013309b6a8fe5202cdd46a0a.jpg"
+      ]
+    },
+    {
+      "id": "6",
+      "title": "Mocha Frappe",
+      "desc": "A rich blend of chocolate and espresso with ice, topped with whipped cream for a refreshing treat.",
+      "rate": 4.4,
+      "price": 42000,
+      "discount": 0.1,
+      "image": "https://i.pinimg.com/1200x/f8/c4/28/f8c428058884d27bab41eb7bf52b6cdb.jpg",
+      "images": [
+        "https://i.pinimg.com/1200x/f8/c4/28/f8c428058884d27bab41eb7bf52b6cdb.jpg",
+        "https://i.pinimg.com/1200x/f8/c4/28/f8c428058884d27bab41eb7bf52b6cdb.jpg",
+        "https://i.pinimg.com/1200x/f8/c4/28/f8c428058884d27bab41eb7bf52b6cdb.jpg"
+      ]
     }
   ],
   "promos": [

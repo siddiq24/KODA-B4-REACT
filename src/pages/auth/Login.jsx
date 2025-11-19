@@ -5,6 +5,7 @@ import { Eye, KeyRound, Mail, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { useDispatch, useSelector } from 'react-redux'
 import { login } from '../../redux/slice/AuthSlice'
+import { toast } from 'react-toastify'
 
 function Login() {
     const [form, setForm] = useState({ email: "", password: '' })
@@ -21,22 +22,23 @@ function Login() {
         dispatch(login(form))
         console.log(user.role)
         setTimeout(() => {
+            toast.success(user?.role.charAt(0).toUpperCase() + user?.role.slice(1) + ' login successfull')
             user.role === 'admin'
                 ? navigate('/admin/dashboard', {replace: true})
                 : user.role === 'user'
-                    ? navigate('/product', {replace: true})
+                    ? navigate('/products', {replace: true})
                     : navigate('/')
         }, 1000);
     }
 
     return (
         <AuthLayout img={'/login.jpg'}>
-            <div className='h-full flex flex-col justify-center gap-8'>
+            <div className='h-full flex flex-col justify-center gap-4 md:gap-8'>
                 <Logo w={150} h={50} color={'#8E6447'} />
                 <form action="" className='space-y-4'>
-                    <h1 className='text-3xl text-[#8E6447] font-semibold'>Login</h1>
+                    <h1 className='text-2xl md:text-3xl text-[#8E6447] font-semibold'>Login</h1>
                     <p className='text-gray-500'>Fill out the form correctly</p>
-                    <label htmlFor="" className='text-xl'>Email</label>
+                    <label htmlFor="" className=' md:text-xl'>Email</label>
                     <div className='relative w-full mt-3 flex items-center'>
                         <input
                             id='email'
@@ -45,11 +47,11 @@ function Login() {
                             placeholder='Enter Your Email'
                             value={form.email}
                             onChange={handleChange}
-                            className='w-full absolute p-3 rounded-lg pl-14 outline outline-gray-300 text-lg'
+                            className='w-full absolute p-3 rounded-lg pl-14 outline outline-gray-300 md:text-lg'
                         />
                         <Mail className='m-4 text-gray-500' />
                     </div>
-                    <label htmlFor="" className='text-xl'>Password</label>
+                    <label htmlFor="" className=' md:text-xl'>Password</label>
                     <div className='relative w-full mt-3 flex items-center justify-between'>
                         <input
                             id='password'
@@ -58,7 +60,7 @@ function Login() {
                             placeholder='Enter Your Password'
                             value={form.password}
                             onChange={handleChange}
-                            className='w-full absolute p-3 rounded-lg pl-14 outline outline-gray-300 text-lg'
+                            className='w-full absolute p-3 rounded-lg pl-14 outline outline-gray-300 md:text-lg'
                         />
                         <KeyRound className='m-4 text-gray-500' />
                         <div>

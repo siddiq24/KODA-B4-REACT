@@ -1,14 +1,26 @@
 import React from 'react'
 import { Logo } from '../svg/svg'
 import { Search } from 'lucide-react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
+import { useSelector } from 'react-redux'
 
 function Sidebar({ isOpen, set }) {
+    const navigate = useNavigate()
+    const { user } = useSelector(state => state.auth)
+    const isActive = (path)=>{
+        if (location.pathname === path){
+            return 'border-[#ff8906] text-[#ff8906]'
+        }else{
+            return 'border-gray-300'
+        }
+    }
     return (
         <div onClick={(e) => e.stopPropagation()}
-            className={`fixed h-screen z-20 top-0 w-[80%] max-w-sm pb-8 bg-white p-3 px-5 transition-all duration-1000 ease-in-out flex flex-col ${isOpen ? 'left-0' : '-left-full'
+            className={`fixed h-screen z-20 top-0 w-[80%] max-w-sm pb-8 bg-white p-3 px-5 transition-all duration-300 ease-in-out flex flex-col ${isOpen ? 'left-0' : '-left-full'
                 }`}>
-            <Logo color={'#8E6447'} w={150} h={50} />
+            <Logo 
+            onClick={()=>navigate('/')}
+            color={'#8E6447'} w={150} h={50} />
             <nav className="mt-8 mb-auto">
                 <label htmlFor="search-product" className='text-xl font-semibold'>Search Product</label>
                 <div className='flex border mt-4 rounded-lg p-4 border-gray-400 gap-3'>
@@ -20,7 +32,7 @@ function Sidebar({ isOpen, set }) {
                         <Link
                             onClick={() => set(false)}
                             to="/"
-                            className="block w-full border-b border-gray-300 py-4 px-2 text-xl hover:text-[#ff8906] transition-colors"
+                            className={`${isActive('/')} block w-full border-b  py-4 px-2 text-xl hover:text-[#ff8906] transition-colors`}
                         >
                             Home
                         </Link>
@@ -29,7 +41,7 @@ function Sidebar({ isOpen, set }) {
                         <Link
                             onClick={() => set(false)}
                             to="/products"
-                            className="block w-full border-b border-gray-300 py-4 px-2 text-xl hover:text-[#ff8906] transition-colors"
+                            className={`${isActive('/products')} block w-full border-b py-4 px-2 text-xl hover:text-[#ff8906] transition-colors`}
                         >
                             Product
                         </Link>
@@ -38,8 +50,10 @@ function Sidebar({ isOpen, set }) {
 
             </nav>
             <nav className='flex-1 flex flex-col justify-end gap-4 pb-8'>
-                <Link to={'/auth/login'} className='w-full text-center text-xl border rounded-lg p-4'>Sign In</Link>
-                <Link to={'/auth/register'} className='w-full text-center text-xl border border-[#ff8906] rounded-lg p-4 bg-[#ff8906]'>Sign Up</Link>
+                {!user && <Link to={'/auth/login'} className='w-full text-center text-xl border rounded-lg p-4'>Sign In</Link>}
+                {!user && <Link to={'/auth/register'} className='w-full text-center text-xl border border-[#ff8906] rounded-lg p-4 bg-[#ff8906]'>Sign Up</Link>}
+                {user && <Link to={'/profile'} className='w-full text-center text-white text-xl border border-[#ff8906] rounded-lg p-4 bg-[#ff8906]'>Profile</Link>}
+                {user && <Link to={'/auth/register'} className='w-full text-center text-white text-xl border border-red-500 rounded-lg p-4 bg-red-500'>Log Out</Link>}
             </nav>
         </div>
     )

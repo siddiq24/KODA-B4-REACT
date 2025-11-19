@@ -18,6 +18,8 @@ import UserList from './pages/admin/UserList'
 import Login from './pages/auth/Login'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import { ToastContainer } from 'react-toastify'
+import { FilterContext } from './context/filterContext'
+import FilterSidebar from './components/FilterSidebar'
 
 function AppRouter() {
     return (
@@ -32,7 +34,7 @@ function AppRouter() {
                 <Route path='/' element={<Layout />}>
                     <Route path='' element={<LandingPage />} />
                     <Route path='products' element={<ProductsPage />} />
-                    <Route path='detail' element={<DetailProduct />} />
+                    <Route path='product/:id/detail' element={<DetailProduct />} />
                     <Route path='/order'>
                         <Route path='payment' element={<PaymentDetails />} />
                         <Route path='history' element={<HistoryOrder />} />
@@ -51,28 +53,48 @@ function AppRouter() {
     )
 }
 
-
 const Layout = () => {
     const [isOpen, setIsOpen] = useState(false)
+    const [filterOpen, setFilterOpen] = useState(false)
 
     return (
-        <div className='relative'>
-            <Navbar isOpen={isOpen} setIsOpen={setIsOpen} />
-            <Outlet />
-            <div onClick={(e) => {
-                setIsOpen(false)
-                e.stopPropagation()
-            }}
-                className={`fixed inset-0 z-10 transition-all duration-300 ${isOpen
-                    ? 'bg-black/50 backdrop-blur-sm opacity-100 visible'
-                    : 'bg-black/0 backdrop-blur-0 opacity-0 invisible'
-                    }`}
-            >
-                <Sidebar isOpen={isOpen} set={setIsOpen} />
+        <FilterContext.Provider value={{ filterOpen, setFilterOpen }}>
+            <div className="relative min-h-screen scroll-smooth">
+                <Navbar isOpen={isOpen} setIsOpen={setIsOpen} />
+                <Outlet />
+
+                {filterOpen && (
+                    <div
+                        onClick={() => setFilterOpen(false)}
+                        className="absolute inset-0 bg-black/80 z-[20] py-20 flex justify-center md:relative md:bg-transparent md:justify-start"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-[80%] md:w-[350px] bg-black md:p-6 rounded-3xl md:rounded-3xl h-fit md:h-auto overflow-y-auto"
+                        >
+                            <FilterSidebar />
+                        </div>
+                    </div>
+                )}
+
+                {/* Overlay Sidebar */}
+                <div
+                    onClick={(e) => {
+                        setIsOpen(false)
+                        e.stopPropagation()
+                    }}
+                    className={`fixed inset-0 z-10 transition-all duration-300 ${isOpen
+                        ? 'bg-black/50 backdrop-blur-sm opacity-100 visible'
+                        : 'bg-transparent backdrop-blur-0 opacity-0 invisible'
+                        }`}
+                >
+                    <Sidebar isOpen={isOpen} set={setIsOpen} />
+                </div>
             </div>
-        </div>
+        </FilterContext.Provider>
     )
 }
+
 
 const AdminLayout = () => {
     const [isOpen, setIsOpen] = useState(false)

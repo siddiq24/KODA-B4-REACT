@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Mail, Phone, Lock, MapPin, User, Eye, EyeOff, PhoneCall } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function Profile() {
     const [showPassword, setShowPassword] = useState(false);
@@ -10,7 +11,7 @@ export default function Profile() {
         password: "password",
         address: "Griya Bandung Indah",
         joined: "20 January 2022",
-        photo: "/img/profile.jpg", // ganti path sesuai aset kamu
+        photo: "/img/profile.jpg",
     });
 
     const handleChange = (e) => {
@@ -20,11 +21,11 @@ export default function Profile() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        alert("Profile updated!");
+        toast("Profile updated!", {type:'success'});
     };
 
     const handleUpload = () => {
-        alert("Upload photo clicked");
+        toast.success("Upload photo clicked");
     };
 
     return (
@@ -116,7 +117,7 @@ export default function Profile() {
                             <span>Password</span>
                             <button
                                 type="button"
-                                onClick={() => alert("Redirect to password reset")}
+                                onClick={() => toast.info("Redirect to password reset")}
                                 className="text-[#ff8906] hover:underline text-sm"
                             >
                                 Set New Password

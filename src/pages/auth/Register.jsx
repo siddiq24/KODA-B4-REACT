@@ -7,7 +7,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { validateEmail, validatePassword } from '../../utils/validateInput'
 import { useDispatch } from 'react-redux'
-import { login, register } from '../../redux/slice/AuthSlice'
+import { register } from '../../redux/slice/AuthSlice'
 
 function Register() {
     const [form, setForm] = useState({
@@ -18,9 +18,9 @@ function Register() {
     })
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
-    const dispatch = useDispatch()
     const [passA, setPassA] = useState(false)
     const [passB, setPassB] = useState(false)
+    const dispatch = useDispatch()
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -28,45 +28,46 @@ function Register() {
     }
 
     const handleClick = async (e) => {
-        e.preventDefault()
-        setLoading(true)
+        e.preventDefault();
+        setLoading(true);
 
-        if (!validateEmail(form.email)) return
-        if (!validatePassword(form.password)) return
+        if (!validateEmail(form.email)) return;
+        if (!validatePassword(form.password)) return;
 
         if (!form.full_name || !form.email || !form.password || !form.conf_password) {
-            return toast('Please fill in all fields', { type: 'error', theme: 'dark' })
+            setLoading(false);
+            return toast('Please fill in all fields', { type: 'error', theme: 'dark' });
         }
 
         if (form.password !== form.conf_password) {
-            return toast('Passwords do not match', { type: 'error', theme: 'dark' })
+            setLoading(false);
+            return toast('Passwords do not match', { type: 'error', theme: 'dark' });
         }
 
         try {
-            const user = (await axios.get(`${import.meta.env.VITE_BASE_URL}/users?email=${form.email}`)).data
+            const payload = {
+                fullname: form.full_name,
+                email: form.email,
+                password: form.password
+            };
 
-            if (user.length > 0) {
-                if (user[0].password == form.password) {
-                    toast('Login Successfull', { type: 'success', theme: 'dark' })
-                    navigate('/products', { replace: true })
-                    dispatch(login(user))
-                    return
-                }
-                navigate('/auth/login', { replace: true })
-                return
-            }
+            const response = await axios.post(
+                `${import.meta.env.VITE_BASE_URL}/auth/register`,
+                payload
+            );
 
+            toast('Registration successful!', { type: 'success', theme: 'dark' });
+            navigate('/auth/login');
+            dispatch(register(response.data))
 
-            form && dispatch(register(form))
-            toast('Registration successful!', { type: 'success', theme: 'dark' })
-            navigate('/auth/login')
         } catch (error) {
-            console.error(error)
-            toast('Registration failed. Please try again.', { type: 'error', theme: 'dark' })
+            console.error(error);
+            toast('Registration failed. Please try again.', { type: 'error', theme: 'dark' });
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
+
 
     return (
         <AuthLayout img={'/register.jpg'}>

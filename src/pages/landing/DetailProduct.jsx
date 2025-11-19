@@ -1,61 +1,81 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus, ShoppingCart, Star, ThumbsUp } from "lucide-react";
 import ProductCard from "../../components/ProductCard";
+import { useParams } from "react-router";
+import axios from "axios";
 
 export default function DetailProduct() {
     const [qty, setQty] = useState(1);
     const [size, setSize] = useState(null);
     const [temp, setTemp] = useState(null);
     const [page, setPage] = useState(1);
+    const [product, setProduct] = useState({})
+    const [products, setProducts] = useState([])
+    const { id } = useParams('id')
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const ress = await axios.get(`${import.meta.env.VITE_BASE_URL}/products?id=${id}`)
+                setProduct(ress.data[0])
+            } catch (error) {
+                console.log(error)
+            }
+        })()
+    }, [id])
+    useEffect(() => {
+        (async () => {
+            try {
+                const ress = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`)
+                setProducts(ress.data)
+            } catch (error) {
+                console.log(error)
+            }
+        })()
+    }, [])
+    const thisPrice = product?.price * (1 - product?.discount)
 
     const handleQty = (type) => {
         setQty((prev) => (type === "plus" ? prev + 1 : prev > 1 ? prev - 1 : 1));
     };
 
-    const images = [
-        "/images/latte1.jpg",
-        "/images/latte2.jpg",
-        "/images/latte3.jpg",
-        "/images/latte4.jpg",
-    ];
-
     return (
-        <div className="p-4 lg:p-10">
+        <div className="p-4 md:px-10 lg:px-[5%]">
             <section className="flex flex-col lg:flex-row gap-6 pt-22 lg:pt-44 ">
-                <div className="flex-1">
+                <div className="flex-3 relative">
                     <div className="aspect-square border border-gray-200 overflow-hidden rounded-2xl shadow">
                         <img
-                            src={images[0]}
-                            alt="Hazelnut Latte"
+                            src={product?.images?.[0]}
+                            alt={product?.title?.[0]}
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    <div className="flex gap-3 mt-4 overflow-x-auto">
-                        {images.map((img, i) => (
-                            i != 0 && <img
+                    <div className="flex mt-4 justify-between">
+                        {product?.images?.map((img, i) => (
+                            <img
                                 key={i}
                                 src={img}
-                                alt={`Hazelnut Latte ${i}`}
-                                className="aspect-square flex-1 border border-gray-200 object-cover rounded-xl cursor-pointer hover:opacity-80 transition"
+                                alt={product?.title + ' ' + [i]}
+                                className="w-[30%] border border-gray-200 object-cover rounded-xl cursor-pointer hover:opacity-80 transition"
                             />
                         ))}
                     </div>
                 </div>
 
 
-                <div className="flex-1 space-y-8 md:space-y-12">
+                <div className="flex-3 md:flex-5 space-y-8 md:space-y-12">
                     <div className="flex flex-col gap-2">
-                        <span className="text-xs md:text-lg bg-red-500 text-white px-3 py-1 rounded-full w-fit font-semibold">
+                        {product?.discount && <span className="text-xs md:text-lg bg-red-500 text-white px-3 py-1 rounded-full w-fit font-semibold">
                             FLASH SALE!
-                        </span>
-                        <h1 className="text-3xl md:text-7xl font-semibold">Hazelnut Latte</h1>
+                        </span>}
+                        <h1 className="text-3xl md:text-7xl font-semibold">{product?.title}</h1>
 
-                        <Rating rate={3.2} />
-
-                        <div className="flex items-center gap-2">
-                            <span className="text-gray-400 line-through">IDR 20.000</span>
-                            <span className="text-orange-500 font-bold text-2xl">IDR 10.000</span>
+                        <div className='mb-2 md:mb-4'>
+                            {product?.discount && <span className=' text-xs  md:text-[1vw] line-through'>IDR {product?.price?.toLocaleString('id')}</span>}
+                            {product?.discount && <span className='text-xs text-gray-400 ml-3'>-{(product?.price - thisPrice).toLocaleString('id')}</span>}
+                            <div className='text-[#FF8906] text-3xl md:text-[2vw] md:font-bold'>IDR {product?.discount ? thisPrice?.toLocaleString('id') : product?.price?.toLocaleString("id") || "-"}</div>
                         </div>
+                        <Rating rate={product?.rate} />
 
                         <div className="flex items-center gap-3 text-gray-600">
                             <span>200+ Review</span>
@@ -65,7 +85,7 @@ export default function DetailProduct() {
                         </div>
 
                         <p className="text-gray-500 leading-relaxed">
-                            Cold brewing is a method of brewing that combines ground coffee and cool water and uses time instead of heat to extract the flavor. It is brewed in small batches and steeped for as long as 48 hours.
+                            {product?.desc}
                         </p>
                     </div>
 
@@ -135,10 +155,12 @@ export default function DetailProduct() {
             </section>
             <section className="">
                 <h1 className='text-4xl my-8 text-center md:px-[10%]'>Recommendation <span className='text-[#ff8906]'>For You</span></h1>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-                    <ProductCard />
-                    <ProductCard />
-                    <ProductCard />
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                    {
+                        [1, 2, 3, 4].map(i => {
+                            return <ProductCard key={i} product={products[i]} />
+                        })
+                    }
                 </div>
             </section>
             <section className='w-full h-22 col-start-1 col-end-3 flex gap-3 justify-center items-center'>
@@ -147,8 +169,8 @@ export default function DetailProduct() {
                         return (
                             <div
                                 key={i}
-                                onClick={()=>setPage(i)}
-                                className={`aspect-square h-12 ${page==i?'bg-[#ff8906]':'bg-gray-400'} rounded-full flex justify-center items-center`}>
+                                onClick={() => setPage(i)}
+                                className={`aspect-square h-12 ${page == i ? 'bg-[#ff8906]' : 'bg-gray-400'} rounded-full flex justify-center items-center`}>
                                 {i}
                             </div>
                         )
@@ -163,22 +185,25 @@ export default function DetailProduct() {
 }
 
 
-export function Rating({ rate = 0 }) {
+export function Rating({ rate }) {
     return (
         <div className="flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((i) => {
                 const fillPercent =
                     rate >= i
                         ? 100
-                        : rate + 1 > i
-                            ? (rate - Math.floor(rate)) * 100
-                            : 0;
+                        : rate + 1 > i + 0.5
+                            ? (rate - Math.floor(rate)) * 100 - 10
+                            : rate + 1 < i + 0.5
+                                ? (rate - Math.floor(rate)) * 100 + 10
+                                : (rate - Math.floor(rate)) * 100;
 
                 return (
                     <div key={i} className="relative w-5 h-5">
                         <Star
                             className="absolute top-0 left-0"
-                            stroke="#ff8906"
+                            stroke={rate ? "#ff8906" : "#3333"}
+                            fill={rate > 0 ? "#fff" : "#3333"}
                             size={20}
                         />
                         <div

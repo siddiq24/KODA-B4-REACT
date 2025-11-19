@@ -1,10 +1,14 @@
 import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react'
-import React, { useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import ProductCard from '../../components/ProductCard';
+import axios from 'axios';
+import { FilterContext } from '../../context/filterContext';
 import FilterSidebar from '../../components/FilterSidebar';
 
 function ProductsPage() {
     const [page, setPage] = useState(1)
+    const [products, setProducts] = useState([])
+    const {filterOpen, setFilterOpen} = useContext(FilterContext)
     const promos = [
         {
             id: 0,
@@ -42,6 +46,19 @@ function ProductsPage() {
             bg: 'bg-[#88B788]'
         },
     ]
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`)
+                setProducts(res.data)
+            } catch (error) {
+                console.error(error);
+
+            }
+        })()
+    }, [])
+    console.log(products)
     return (
         <div className='space-y-6 overflow-hidden px-[5%] md:p-0'>
             <section className='hidden md:block'>
@@ -55,7 +72,9 @@ function ProductsPage() {
                         placeholder='Find Product'
                         className='h-15 w-full outline-none text-xl' />
                 </div>
-                <div className='aspect-square h-15 flex items-center justify-center bg-[#ff8906] rounded-lg'>
+                <div 
+                onClick={()=>{setFilterOpen(!filterOpen)}}
+                className='aspect-square h-15 flex items-center justify-center bg-[#ff8906] rounded-lg'>
                     <SlidersHorizontal />
                 </div>
             </section>
@@ -66,12 +85,12 @@ function ProductsPage() {
             <section className='space-y-6 md:px-[10%] '>
                 <h1 className='text-4xl'>Our <span className='text-[#ff8906]'>Product</span></h1>
                 <section className='md:flex gap-5'>
-                    <FilterSidebar />
+                    <FilterSidebar className={'hidden md:block'}/>
                     <div className='grid grid-cols-2 gap-6 md:flex-2'>
                         {
-                            [1, 2, 3, 4, 5, 6].map(i => {
+                            products?.map(i => {
                                 return (
-                                    <ProductCard key={i} />
+                                    <ProductCard key={i.id} product={i} />
                                 )
                             })
                         }
@@ -106,13 +125,16 @@ const Card = ({ data }) => {
     const handleSelect = (index) => {
         setCenter(index);
         const container = containerRef.current;
-        console.log(container)
         const selected = container.children[index];
+
         if (container && selected) {
+            const containerWidth = container.offsetWidth;
+            const selectedWidth = selected.offsetWidth;
+            const scrollPosition = selected.offsetLeft - (containerWidth / 2) + (selectedWidth / 2);
+
             container.scrollTo({
-                left: selected.offsetLeft,
+                left: scrollPosition,
                 behavior: "smooth",
-                block: "start"
             });
         }
     };
@@ -121,7 +143,7 @@ const Card = ({ data }) => {
         <section className="space-y-4">
             <div
                 ref={containerRef}
-                className="flex gap-6 w-screen scroll-smooth overflow-hidden py-2 z-2 relative"
+                className="flex gap-6 w-full scroll-smooth overflow-hidden py-2 z-2 relative"
             >
                 {[...data, ...data].map((item, i) => (
                     <div

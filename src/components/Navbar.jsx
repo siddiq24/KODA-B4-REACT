@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Logo } from '../svg/svg'
 import { Hamburger, HamburgerIcon, Menu, Search, ShoppingCart } from 'lucide-react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useMatch, useNavigate, useResolvedPath } from 'react-router'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../redux/slice/AuthSlice'
 
@@ -9,14 +9,23 @@ function Navbar({ isOpen, setIsOpen }) {
     const [click, setClick] = useState(false)
     const navigate = useNavigate()
     const { user } = useSelector(state => state.auth)
+    const isActive = (path)=>{
+        if (location.pathname === path ){
+            return 'border-[#ff8906] text-[#ff8906]'
+        }else{
+            return 'border-gray-300 text-white'
+        }
+    }
     return (
         <div className='w-full flex p-3 px-5 fixed backdrop-brightness-50 backdrop-blur-md z-3 md:px-[5%] lg:px-[6%] md:py-6'>
             <div className='flex gap-3 md:w-[45%] justify-between items-center md:min-w-88'>
-                <div className='h-fit pb-3 w-[30%]'>
-                    <Logo color={'#fff'} className={'w-50 h-10 md:w-[150px] md:h-auto'} />
+                <div 
+                onClick={()=>navigate('/')}
+                className='h-fit pb-3 w-[30%]'>
+                    <Logo color={'#fff'} className={'h-8 md:w-[150px] md:h-auto'} />
                 </div>
-                <div className='h-fit border-b border-gray-300 text-center pb-3 hidden md:block w-fit'><Link to="/" className="lg:text-xl hover:text-[#ff8906] text-white transition-colors">Home</Link></div>
-                <div className='h-fit border-b border-gray-300 text-center pb-3 hidden md:block w-fit'><Link to="/products" className="lg:text-xl hover:text-[#ff8906] text-white transition-colors">Product</Link></div>
+                <div className={`h-fit border-b text-center pb-3 hidden md:block w-fit ${isActive('/')}`}><Link to="/" className="lg:text-xl hover:text-[#ff8906] transition-colors">Home</Link></div>
+                <div className={`h-fit border-b text-center pb-3 hidden md:block w-fit ${isActive('/products')}`}><Link to="/products" className="lg:text-xl hover:text-[#ff8906] transition-colors">Product</Link></div>
 
             </div>
             <div className='w-full flex justify-end items-center gap-6 md:pl-10'>
@@ -35,7 +44,7 @@ function Navbar({ isOpen, setIsOpen }) {
                     <ShoppingCart color='#fff' strokeWidth={1} size={30} />
                 </Link>
                 <div onClick={() => { setIsOpen(!isOpen) }}
-                    className='md:hidden'
+                    className='md:hidden border'
                 >
                     <Menu color='#fff' strokeWidth={1} size={30} />
                 </div>
@@ -45,8 +54,8 @@ function Navbar({ isOpen, setIsOpen }) {
                         ? <div onClick={() => { setClick(!click) }}
                             className='relative'
                         >
-                            <img src={user.image || 'https://i.pinimg.com/736x/f0/65/5f/f0655f2737da76be9b4ac435c65e3d9b.jpg'} alt=""
-                                className='size-20 border border-white/20 rounded-full object-center object-cover'
+                            <img src={user.image || 'https://i.pinimg.com/736x/f0/65/5f/f0655f2737da76be9b4ac435c65e3d9b.jpg'} alt={user?.full_name}
+                                className='hidden md:block border h-10 md:h-20 border-white/20 rounded-full object-center object-cover'
                             />
                             {click && <Button />}
                         </div>
@@ -67,19 +76,19 @@ function Button() {
     return (
         <div className='w-full h-14 top-[110%] absolute flex justify-center '>
             <div className='bg-white w-fit h-fit p-2 rounded-lg space-y-2'>
-                <button
+                {<button
                     onClick={()=>{
                         navigate('/profile')
                     }}
                     className='bg-[#ff8906] w-full text-xl rounded-lg text-nowrap p-2 px-8'
-                >Profile</button>
-                <button
+                >Profile</button>}
+                {<button
                     onClick={()=>{
                         dispatch(logout())
                         navigate('/')
                     }}
                     className='bg-red-500 w-full text-xl rounded-lg text-nowrap p-2 px-8 text-white'
-                >Log Out</button>
+                >Log Out</button>}
             </div>
         </div>
     )
