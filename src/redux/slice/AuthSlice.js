@@ -3,16 +3,31 @@ import axios from "axios"
 
 const initialState = {
     user: null,
+    profile: null,
     isLoading: false,
+    error: null,
+    token: localStorage.getItem('token') || null,
+}
+
+const setAuthHeader = (token) => {
+    if (token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    } else {
+        delete axios.defaults.headers.common['Authorization']
+    }
+}
+
+if (initialState.token) {
+    setAuthHeader(initialState.token)
 }
 
 export const register = createAsyncThunk(
     "auth/register",
-    async (user) => {
+    async (user, { rejectWithValue }) => {
         try {
             console.log("Data register:", user)
             const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/users`, {
-                full_name: user.full_name,
+                fullname: user.full_name,
                 email: user.email,
                 password: user.password,
                 role: 'user',
@@ -21,79 +36,172 @@ export const register = createAsyncThunk(
             console.log("Respon register:", res.data)
             return res.data
         } catch (error) {
-            console.error("Register error:", error.message)
-            throw error
+            console.error("Register error:", error.response?.data || error.message)
+            return rejectWithValue(error.response?.data || error.message)
         }
     }
 )
 
 export const login = createAsyncThunk(
     "auth/login",
-    async (form) => {
+    async (form, { rejectWithValue }) => {
         try {
             const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/login`, form)
-            const users = res.data
+            console.log("Respon login:", res.data)
 
-            if (users.length === 0) {
-                throw new Error("Email atau password salah")
+            const token = res.data.token
+            if (!token) {
+                throw new Error('No token received from server')
             }
 
+            localStorage.setItem('token', token)
+            setAuthHeader(token)
 
+            const profileRes = await axios.get(`${import.meta.env.VITE_BASE_URL}/profile`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            console.log("Profile data:", profileRes.data.result)
+
+            return {
+                user: profileRes.data.result,
+                token: token
+            }
         } catch (error) {
-            console.error("Login error:", error.message)
-            throw error
+            console.error("Login error:", error.response?.data || error.message)
+            localStorage.removeItem('token')
+            return rejectWithValue(error.response?.data || error.message)
+        }
+    }
+)
+
+export const getProfile = createAsyncThunk(
+    "auth/getProfile",
+    async (_, { rejectWithValue, getState }) => {
+        try {
+            const { auth } = getState()
+            const token = auth.token || localStorage.getItem('token')
+
+            if (!token) {
+                throw new Error('No token available')
+            }
+
+            setAuthHeader(token)
+
+            const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/profile`)
+            console.log("Profile data:", res.data.result)
+            return res.data.result
+        } catch (error) {
+            console.error("Get profile error:", error.response?.data || error.message)
+            return rejectWithValue(error.response?.data || error.message)
         }
     }
 )
 
 export const logout = createAsyncThunk(
     "auth/logout",
-    async () => {
-        await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/logout`, {
-            header: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token')
+            if (token) {
+                setAuthHeader(token)
+                await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/logout`)
             }
-        })
-        localStorage.removeItem('persist:root')
-        return null
+
+            localStorage.removeItem('token')
+            localStorage.removeItem('persist:root')
+            setAuthHeader(null)
+
+            return null
+        } catch (error) {
+            console.error("Logout error:", error.response?.data || error.message)
+            localStorage.removeItem('token')
+            localStorage.removeItem('persist:root')
+            setAuthHeader(null)
+            return rejectWithValue(error.response?.data || error.message)
+        }
     }
 )
 
 export const authSlice = createSlice({
     name: 'auth',
     initialState,
-    reducers: {},
+    reducers: {
+        clearError: (state) => {
+            state.error = null
+        },
+        updateProfile: (state, action) => {
+            if (state.user) {
+                state.user = { ...state.user, ...action.payload }
+            }
+        }
+    },
     extraReducers: (builder) => {
         builder
-            // Register
             .addCase(register.pending, (state) => {
                 state.isLoading = true
+                state.error = null
             })
             .addCase(register.fulfilled, (state, action) => {
                 state.isLoading = false
                 state.user = action.payload
+                state.error = null
             })
-            .addCase(register.rejected, (state) => {
+            .addCase(register.rejected, (state, action) => {
                 state.isLoading = false
+                state.error = action.payload
             })
 
-            // Login
             .addCase(login.pending, (state) => {
                 state.isLoading = true
+                state.error = null
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.isLoading = false
-                state.user = action.payload
+                state.user = action.payload.user
+                state.token = action.payload.token
+                state.error = null
             })
-            .addCase(login.rejected, (state) => {
+            .addCase(login.rejected, (state, action) => {
                 state.isLoading = false
+                state.error = action.payload
+                state.user = null
+                state.token = null
             })
 
-            // Logout
+            .addCase(getProfile.pending, (state) => {
+                state.isLoading = true
+                state.error = null
+            })
+            .addCase(getProfile.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.user = action.payload
+                state.error = null
+            })
+            .addCase(getProfile.rejected, (state, action) => {
+                state.isLoading = false
+                state.error = action.payload
+                state.user = null
+                state.token = null
+                localStorage.removeItem('token')
+            })
+
             .addCase(logout.fulfilled, (state) => {
                 state.user = null
+                state.token = null
+                state.error = null
+                state.isLoading = false
+            })
+            .addCase(logout.rejected, (state) => {
+                state.user = null
+                state.token = null
+                state.error = null
+                state.isLoading = false
             })
     }
 })
 
+export const { clearError, updateProfile } = authSlice.actions
 export default authSlice.reducer
