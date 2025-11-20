@@ -66,5 +66,5 @@ jobs:
           script: |
             docker compose -f /home/sidik/frontend/docker-compose.yaml down -v
             docker compose -f /home/sidik/frontend/docker-compose.yaml pull
-            docker compose -f /home/sidik/frontend/docker-compose.yaml up -d --build
+            docker compose -f /home/sidik/frontend/docker-compose.yaml up -d
             docker system prune -af --volumes
