@@ -6,7 +6,7 @@ import axios from "axios";
 
 export default function DetailProduct() {
     const [qty, setQty] = useState(1);
-    const [size, setSize] = useState(null);
+    const [selectedSize, setSelectedSize] = useState(null);
     const [temp, setTemp] = useState(null);
     const [page, setPage] = useState(1);
     const [product, setProduct] = useState({})
@@ -16,28 +16,70 @@ export default function DetailProduct() {
     useEffect(() => {
         (async () => {
             try {
-                const ress = await axios.get(`${import.meta.env.VITE_BASE_URL}/products?id=${id}`)
-                setProduct(ress.data[0])
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products/${id}`)
+                setProduct(res.data.result[0])
+
+                if (res.data.result?.sizes?.[0]) {
+                    setSelectedSize(res.data.result[0].sizes[0])
+                }
             } catch (error) {
-                console.log(error)
+                console.log("Error fetching product:", error)
             }
         })()
     }, [id])
+
+    console.log(product)
+
     useEffect(() => {
         (async () => {
             try {
-                const ress = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`)
-                setProducts(ress.data)
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products/${id}/recomendation`)
+                setProducts(res.data.result || res.data || [])
             } catch (error) {
-                console.log(error)
+                console.log("Error fetching products:", error)
             }
         })()
-    }, [])
-    const thisPrice = product?.price * (1 - product?.discount)
+    }, [id])
+
+
+    const discount = product?.discount?.Valid ? product.discount.Float64 : 0
+    const discountAmount = product?.price ? (product.price * discount / 100) : 0
+    const finalPrice = product?.price ? (product.price - discountAmount) : 0
+
+    const rp = (price) => {
+        return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            minimumFractionDigits: 0
+        }).format(price)
+    }
 
     const handleQty = (type) => {
         setQty((prev) => (type === "plus" ? prev + 1 : prev > 1 ? prev - 1 : 1));
     };
+
+    const handleAddToCart = () => {
+
+        const cartItem = {
+            productId: product.id,
+            title: product.title,
+            price: finalPrice,
+            originalPrice: product.price,
+            discount: discount,
+            quantity: qty,
+            size: selectedSize,
+            temperature: temp,
+            image: product.images?.[0]
+        }
+        console.log("Add to cart:", cartItem)
+
+    }
+
+    const handleBuyNow = () => {
+
+        handleAddToCart()
+
+    }
 
     return (
         <div className="p-4 md:px-10 lg:px-[5%]">
@@ -46,83 +88,106 @@ export default function DetailProduct() {
                     <div className="aspect-square border border-gray-200 overflow-hidden rounded-2xl shadow">
                         <img
                             src={product?.images?.[0]}
-                            alt={product?.title?.[0]}
+                            alt={product?.title}
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    <div className="flex mt-4 justify-between">
-                        {product?.images?.map((img, i) => (
-                            <img
-                                key={i}
-                                src={img}
-                                alt={product?.title + ' ' + [i]}
-                                className="w-[30%] border border-gray-200 object-cover rounded-xl cursor-pointer hover:opacity-80 transition"
-                            />
-                        ))}
-                    </div>
+                    {product?.images && product.images.length > 1 && (
+                        <div className="flex mt-4 gap-2 justify-between">
+                            {product.images.map((img, i) => (
+                                <img
+                                    key={i}
+                                    src={img}
+                                    alt={`${product?.title} ${i + 1}`}
+                                    className="w-[30%] aspect-square border border-gray-200 object-cover rounded-xl cursor-pointer hover:opacity-80 transition"
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
-
 
                 <div className="flex-3 md:flex-5 space-y-8 md:space-y-12">
                     <div className="flex flex-col gap-2">
-                        {product?.discount && <span className="text-xs md:text-lg bg-red-500 text-white px-3 py-1 rounded-full w-fit font-semibold">
-                            FLASH SALE!
-                        </span>}
+                        {discount > 0 && (
+                            <span className="text-xs md:text-lg bg-red-500 text-white px-3 py-1 rounded-full w-fit font-semibold">
+                                {discount}% OFF!
+                            </span>
+                        )}
+
                         <h1 className="text-3xl md:text-7xl font-semibold">{product?.title}</h1>
 
+                        {product?.category && (
+                            <span className="text-sm md:text-lg text-gray-600 bg-gray-100 px-3 py-1 rounded-full w-fit">
+                                {product.category}
+                            </span>
+                        )}
+
                         <div className='mb-2 md:mb-4'>
-                            {product?.discount && <span className=' text-xs  md:text-[1vw] line-through'>IDR {product?.price?.toLocaleString('id')}</span>}
-                            {product?.discount && <span className='text-xs text-gray-400 ml-3'>-{(product?.price - thisPrice).toLocaleString('id')}</span>}
-                            <div className='text-[#FF8906] text-3xl md:text-[2vw] md:font-bold'>IDR {product?.discount ? thisPrice?.toLocaleString('id') : product?.price?.toLocaleString("id") || "-"}</div>
+                            {discount > 0 && (
+                                <>
+                                    <span className='text-xs md:text-lg line-through text-gray-500'>
+                                        {rp(product.price)}
+                                    </span>
+                                    <span className='text-xs text-green-600 ml-3 font-semibold'>
+                                        Save {rp(discountAmount)}
+                                    </span>
+                                </>
+                            )}
+                            <div className='text-[#FF8906] text-3xl md:text-4xl font-bold'>
+                                {rp(finalPrice)}
+                            </div>
                         </div>
-                        <Rating rate={product?.rate} />
+
+                        <Rating rate={product?.rate || 4.8} />
 
                         <div className="flex items-center gap-3 text-gray-600">
                             <span>200+ Review</span>
                             <span>|</span>
                             <span>Recommendation</span>
-                            <span className=""><ThumbsUp color="#ff8906" /></span>
+                            <span><ThumbsUp color="#ff8906" /></span>
                         </div>
 
-                        <p className="text-gray-500 leading-relaxed">
+                        <p className="text-gray-500 leading-relaxed text-lg">
                             {product?.desc}
                         </p>
                     </div>
 
-
                     <div className="flex items-center gap-8">
+                        <span className="font-semibold text-lg">Quantity:</span>
                         <button
                             onClick={() => handleQty("minus")}
-                            className="border p-2 rounded hover:scale-105 border-[#ff8906]"
+                            className="border p-2 rounded hover:scale-105 border-[#ff8906] transition-transform"
                         >
                             <Minus size={25} />
                         </button>
-                        <span className="font-semibold text-2xl">{qty}</span>
+                        <span className="font-semibold text-2xl min-w-8 text-center">{qty}</span>
                         <button
                             onClick={() => handleQty("plus")}
-                            className="border p-2 rounded hover:scale-105 border-[#ff8906] bg-[#ff8906]"
+                            className="border p-2 rounded hover:scale-105 border-[#ff8906] bg-[#ff8906] text-white transition-transform"
                         >
                             <Plus size={25} />
                         </button>
                     </div>
 
-
-                    <div>
-                        <p className="font-semibold mb-2 text-lg">Choose Size</p>
-                        <div className="flex gap-3">
-                            {["Regular", "Medium", "Large"].map((s) => (
-                                <button
-                                    key={s}
-                                    onClick={() => setSize(s)}
-                                    className={`px-4 py-4 w-full border rounded-md ${size === s ? "bg-orange-500 text-white border-orange-500" : "border-gray-300"
-                                        }`}
-                                >
-                                    {s}
-                                </button>
-                            ))}
+                    {product?.sizes && product.sizes.length > 0 && (
+                        <div>
+                            <p className="font-semibold mb-2 text-lg">Choose Size</p>
+                            <div className="flex gap-3">
+                                {product.sizes.map((size) => (
+                                    <button
+                                        key={size.id}
+                                        onClick={() => setSelectedSize(size)}
+                                        className={`px-4 py-4 w-full border rounded-md transition-colors ${selectedSize?.id === size.id
+                                            ? "bg-[#ff8906] text-white border-[#ff8906]"
+                                            : "border-gray-300 hover:border-[#ff8906]"
+                                            }`}
+                                    >
+                                        {size.name}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-
+                    )}
 
                     <div>
                         <p className="font-semibold mb-2 text-lg">Hot/Ice?</p>
@@ -131,7 +196,9 @@ export default function DetailProduct() {
                                 <button
                                     key={t}
                                     onClick={() => setTemp(t)}
-                                    className={`px-4 w-full py-4 border rounded-md ${temp === t ? "bg-orange-500 text-white border-orange-500" : "border-gray-300"
+                                    className={`px-4 w-full py-4 border rounded-md transition-colors ${temp === t
+                                        ? "bg-[#ff8906] text-white border-[#ff8906]"
+                                        : "border-gray-300 hover:border-[#ff8906]"
                                         }`}
                                 >
                                     {t}
@@ -140,70 +207,76 @@ export default function DetailProduct() {
                         </div>
                     </div>
 
-
-                    <div className="md:flex gap-3 pt-3 space-y-4">
-                        <button className="flex-1 w-full text-xl bg-orange-500 text-white py-5 h-20 rounded-md hover:bg-orange-600">
-                            Buy
+                    <div className="md:flex gap-3 pt-3 space-y-4 md:space-y-0">
+                        <button
+                            onClick={handleBuyNow}
+                            className="flex-1 w-full text-xl bg-[#ff8906] text-white py-5 h-20 rounded-md hover:bg-orange-600 transition-colors font-semibold"
+                        >
+                            Buy Now
                         </button>
-                        <button className="flex-1 w-full text-xl border border-orange-500 text-orange-500 py-5 h-20 rounded-md hover:bg-orange-50 flex items-center justify-center gap-2">
+                        <button
+                            onClick={handleAddToCart}
+                            className="flex-1 w-full text-xl border border-[#ff8906] text-[#ff8906] py-5 h-20 rounded-md hover:bg-orange-50 transition-colors flex items-center justify-center gap-2 font-semibold"
+                        >
                             <ShoppingCart size={25} />
                             Add to cart
                         </button>
                     </div>
                 </div>
+            </section>
 
-            </section>
-            <section className="">
-                <h1 className='text-4xl my-8 text-center md:px-[10%]'>Recommendation <span className='text-[#ff8906]'>For You</span></h1>
+            <section className="mt-16">
+                <h1 className='text-4xl my-8 text-center md:px-[10%]'>
+                    Recommendation <span className='text-[#ff8906]'>For You</span>
+                </h1>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-                    {
-                        [1, 2, 3, 4].map(i => {
-                            return <ProductCard key={i} product={products[i]} />
-                        })
-                    }
+                    {products.slice(0, 4).map((product, index) => (
+                        <ProductCard key={product.id || index} product={product} />
+                    ))}
                 </div>
             </section>
-            <section className='w-full h-22 col-start-1 col-end-3 flex gap-3 justify-center items-center'>
-                {
-                    [1, 2, 3, 4].map(i => {
-                        return (
-                            <div
-                                key={i}
-                                onClick={() => setPage(i)}
-                                className={`aspect-square h-12 ${page == i ? 'bg-[#ff8906]' : 'bg-gray-400'} rounded-full flex justify-center items-center`}>
-                                {i}
-                            </div>
-                        )
-                    })
-                }
-                <div className='aspect-square h-12 bg-[#ff8906] rounded-full flex justify-center items-center'>
-                    <ArrowRight color='white' />
-                </div>
-            </section>
+
+            {products.length > 4 && (
+                <section className='w-full h-22 mt-8 flex gap-3 justify-center items-center'>
+                    {[1, 2, 3, 4].map(i => (
+                        <div
+                            key={i}
+                            onClick={() => setPage(i)}
+                            className={`aspect-square h-12 cursor-pointer ${page === i ? 'bg-[#ff8906]' : 'bg-gray-400'
+                                } rounded-full flex justify-center items-center transition-colors`}
+                        >
+                            {i}
+                        </div>
+                    ))}
+                    <div
+                        onClick={() => setPage(prev => prev + 1)}
+                        className='aspect-square h-12 bg-[#ff8906] rounded-full flex justify-center items-center cursor-pointer hover:bg-orange-600 transition-colors'
+                    >
+                        <ArrowRight color='white' />
+                    </div>
+                </section>
+            )}
         </div>
     );
 }
 
-
-export function Rating({ rate }) {
+export function Rating({ rate = 0 }) {
     return (
         <div className="flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((i) => {
                 const fillPercent =
                     rate >= i
                         ? 100
-                        : rate + 1 > i + 0.5
-                            ? (rate - Math.floor(rate)) * 100 - 10
-                            : rate + 1 < i + 0.5
-                                ? (rate - Math.floor(rate)) * 100 + 10
-                                : (rate - Math.floor(rate)) * 100;
+                        : rate > i - 1
+                            ? (rate - (i - 1)) * 100
+                            : 0;
 
                 return (
                     <div key={i} className="relative w-5 h-5">
                         <Star
                             className="absolute top-0 left-0"
-                            stroke={rate ? "#ff8906" : "#3333"}
-                            fill={rate > 0 ? "#fff" : "#3333"}
+                            stroke="#ff8906"
+                            fill="none"
                             size={20}
                         />
                         <div
@@ -219,7 +292,7 @@ export function Rating({ rate }) {
                     </div>
                 );
             })}
-            <h3 className="text-xl">{rate}</h3>
+            <h3 className="text-xl font-semibold">{rate > 0 ? rate.toFixed(1) : '0.0'}</h3>
         </div>
     );
 }
