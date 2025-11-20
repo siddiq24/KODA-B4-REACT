@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function FilterSidebar({className}) {
-    const [search, setSearch] = useState("");
+export default function FilterSidebar({ className, search, setSearch }) {
     const [selectedCategory, setSelectedCategory] = useState("Coffee");
     const [selectedSort, setSelectedSort] = useState("Flash sale");
     const [range, setRange] = useState([374, 500]);

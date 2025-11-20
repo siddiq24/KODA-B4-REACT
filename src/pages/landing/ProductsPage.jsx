@@ -8,7 +8,11 @@ import FilterSidebar from '../../components/FilterSidebar';
 function ProductsPage() {
     const [page, setPage] = useState(1)
     const [products, setProducts] = useState([])
-    const {filterOpen, setFilterOpen} = useContext(FilterContext)
+    const { filterOpen, setFilterOpen } = useContext(FilterContext)
+    // const [filter, setFilter] = useState()
+    const [search, setSearch] = useState("")
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+
     const promos = [
         {
             id: 0,
@@ -48,16 +52,32 @@ function ProductsPage() {
     ]
 
     useEffect(() => {
-        (async () => {
-            try {
-                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`)
-                setProducts(res.data)
-            } catch (error) {
-                console.error(error);
+        axios.get(`${import.meta.env.VITE_BASE_URL}/products`)
+            .then(res => setProducts(res.data.result))
+            .catch(err => console.log(err));
+    }, []);
 
-            }
-        })()
-    }, [])
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [search]);
+
+    useEffect(() => {
+        if (debouncedSearch === "") return;
+
+        console.log("Kirim search ke API:", debouncedSearch);
+
+        axios.get(`${import.meta.env.VITE_BASE_URL}/products?search=${debouncedSearch}`)
+            .then(res => setProducts(res.data.result))
+            .catch(err => console.log(err));
+
+    }, [debouncedSearch]);
+
     console.log(products)
     return (
         <div className='space-y-6 overflow-hidden px-[5%] md:p-0'>
@@ -69,12 +89,17 @@ function ProductsPage() {
                     <Search />
                     <input
                         type="text"
+                        value={search}
+                        onChange={(e) => {
+                            setSearch(e.target.value)
+                            console.log(e.target.value)
+                        }}
                         placeholder='Find Product'
                         className='h-15 w-full outline-none text-xl' />
                 </div>
-                <div 
-                onClick={()=>{setFilterOpen(!filterOpen)}}
-                className='aspect-square h-15 flex items-center justify-center bg-[#ff8906] rounded-lg'>
+                <div
+                    onClick={() => { setFilterOpen(!filterOpen) }}
+                    className='aspect-square h-15 flex items-center justify-center bg-[#ff8906] rounded-lg'>
                     <SlidersHorizontal />
                 </div>
             </section>
@@ -85,7 +110,7 @@ function ProductsPage() {
             <section className='space-y-6 md:px-[10%] '>
                 <h1 className='text-4xl'>Our <span className='text-[#ff8906]'>Product</span></h1>
                 <section className='md:flex gap-5'>
-                    <FilterSidebar className={'hidden md:block'}/>
+                    <FilterSidebar className={'hidden md:block'} search={search} setSearch={setSearch} />
                     <div className='grid grid-cols-2 gap-6 md:flex-2'>
                         {
                             products?.map(i => {
