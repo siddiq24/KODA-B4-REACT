@@ -61,7 +61,7 @@ function ForgotPassword() {
                 console.log(response.data);
 
                 setTimeout(() => {
-                    window.location.href = "/login";
+                    window.location.href = "auth/login";
                 }, 2000);
             }
         } catch (error) {
