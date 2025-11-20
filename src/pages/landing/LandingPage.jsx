@@ -7,20 +7,31 @@ import axios from 'axios'
 
 function LandingPage() {
     const [openChat, setOpenChat] = useState(false)
+    const [products, setProducts] = useState([])
+
     useEffect(() => {
         (async () => {
-            let ress = await axios.get(import.meta.env.VITE_BASE_URL)
-            console.log(ress.data);
+            try {
+                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products/favorite?limit=4`)
+
+                setProducts(response.data.result || [])
+            } catch (error) {
+                console.error('Error fetching products:', error)
+                setProducts([])
+            }
         })()
-    })
+    }, [])
+
     return (
         <div className={openChat ? 'fixed top-0' : 'relative'}>
-            <div onClick={() => { setOpenChat(!openChat) }}
-                className='w-16 h-16 md:w-[calc(20px+4vw)] md:h-[calc(20px+4vw)] md:max-w-20 md:max-h-20 bg-[#ff8906] fixed right-7 bottom-7 md:right-15 md:bottom-15 rounded-full flex justify-center items-center z-100'>
-                <MessageCircleMore color='#000' size={24} md:size={44} strokeWidth={'1.5px'} />
+            <div
+                onClick={() => { setOpenChat(!openChat) }}
+                className='w-16 h-16 md:w-[calc(20px+4vw)] md:h-[calc(20px+4vw)] md:max-w-20 md:max-h-20 bg-[#ff8906] fixed right-7 bottom-7 md:right-15 md:bottom-15 rounded-full flex justify-center items-center z-100 cursor-pointer'
+            >
+                <MessageCircleMore color='#000' size={24} strokeWidth={'1.5px'} />
             </div>
 
-            <section className='relative  md:flex flex-row-reverse min-h-screen md:h-screen'>
+            <section className='relative md:flex flex-row-reverse min-h-screen md:h-screen'>
                 <div className='md:relative h-[50vh] md:h-auto md:w-[50%] bg-[url(/home.jpg)] bg-cover bg-center'>
                     <Chat isOpen={openChat} />
                 </div>
@@ -87,18 +98,18 @@ function LandingPage() {
                 </div>
 
                 <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
-                    <ProductCard />
+                    {products.map(product => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
                 </div>
             </section>
 
-            {/* Map Section */}
             <section className='px-2 md:px-[10vw] md:py-16 bg-gray-50 '>
                 <div className='md:flex justify-center h-fit'>
                     <Map />
                 </div>
             </section>
 
-            {/* Testimonial Section */}
             <section className='px-6 md:px-[10vw] py-12 md:py-[5vw] bg-gradient-to-b from-black/80 to-black flex flex-col md:flex-row gap-8'>
                 <div className='md:w-1/2 flex flex-col md:flex-row'>
                     <h2 className='text-white md:hidden text-xl font-bold w-full text-center mb-6'>TESTIMONIAL</h2>
@@ -109,7 +120,6 @@ function LandingPage() {
                     />
                 </div>
 
-                {/* Testimonial Content */}
                 <div className='md:w-1/2 text-white flex flex-col gap-6 md:gap-8'>
                     <h2 className='hidden md:block text-lg md:text-[1.3vw]'>TESTIMONIAL</h2>
                     <div>
@@ -126,17 +136,17 @@ function LandingPage() {
 
                     <div className='flex gap-3 md:gap-5 items-center'>
                         {[...Array(5)].map((_, i) => (
-                            <Star key={i} fill='#ff8906' color='#ff8906' size={20} md:size={'1.3vw'} />
+                            <Star key={i} fill='#ff8906' color='#ff8906' size={20} />
                         ))}
                         <p className='text-base md:text-lg'>5.0</p>
                     </div>
 
                     <div className='flex gap-3 md:gap-4'>
                         <button className='w-8 h-8 md:w-[calc(15px+2vw)] md:h-[calc(15px+2vw)] bg-white rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors'>
-                            <ChevronLeft color='#000' size={16} md:size={20} />
+                            <ChevronLeft color='#000' size={16} />
                         </button>
                         <button className='w-8 h-8 md:w-[calc(15px+2vw)] md:h-[calc(15px+2vw)] bg-[#FF8906] rounded-full flex items-center justify-center hover:bg-orange-600 transition-colors'>
-                            <ChevronRight color='#000' size={16} md:size={20} />
+                            <ChevronRight color='#000' size={16} />
                         </button>
                     </div>
                     <div className='flex gap-2 md:gap-[1vw]'>
@@ -145,7 +155,6 @@ function LandingPage() {
                         <div className='w-2 h-2 md:w-[1vw] md:h-[1vw] bg-white rounded-full'></div>
                         <div className='w-2 h-2 md:w-[1vw] md:h-[1vw] bg-white rounded-full'></div>
                     </div>
-
                 </div>
             </section>
         </div>
