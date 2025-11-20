@@ -44,8 +44,8 @@ function ForgotPassword() {
                     return;
                 }
 
-                if (password.length < 6) {
-                    setMessage("Password harus minimal 6 karakter");
+                if (password.length < 8) {
+                    setMessage("Password harus minimal 8 karakter");
                     return;
                 }
 
