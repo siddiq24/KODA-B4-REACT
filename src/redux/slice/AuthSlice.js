@@ -2,10 +2,15 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import axios from "axios"
 
 const initialState = {
-    user: null,
+    user: {
+        image: ""
+    },
     profile: null,
     isLoading: false,
+    loading: false,
+    uploading: false,
     error: null,
+    success: false,
     token: localStorage.getItem('token') || null,
 }
 
@@ -82,7 +87,7 @@ export const getProfile = createAsyncThunk(
     async (_, { rejectWithValue, getState }) => {
         try {
             const { auth } = getState()
-            const token = auth.token || localStorage.getItem('token')
+            const token = auth.token
 
             if (!token) {
                 throw new Error('No token available')
@@ -125,6 +130,53 @@ export const logout = createAsyncThunk(
     }
 )
 
+export const updateProfile = createAsyncThunk(
+    'auth/updateProfile',
+    async ({ userData, token }, { rejectWithValue }) => {
+        try {
+            const response = await axios.patch(
+                `${import.meta.env.VITE_BASE_URL}/profile`,
+                userData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            return response.data.result;
+        } catch (error) {
+            console.log(error)
+            return rejectWithValue(error.response?.data?.message || 'Failed to update profile');
+        }
+    }
+);
+
+export const updateProfileImage = createAsyncThunk(
+    'auth/updateProfileImage',
+    async ({ imageFile, token }, { rejectWithValue }) => {
+        try {
+            const formData = new FormData();
+            formData.append('image', imageFile);
+
+            const response = await axios.patch(
+                `${import.meta.env.VITE_BASE_URL}/profile/image`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+            return response.data.result;
+        } catch (error) {
+            console.log(error)
+            return rejectWithValue(error.response?.data?.message || 'Failed to upload image');
+        }
+    }
+);
+
 export const authSlice = createSlice({
     name: 'auth',
     initialState,
@@ -132,14 +184,16 @@ export const authSlice = createSlice({
         clearError: (state) => {
             state.error = null
         },
-        updateProfile: (state, action) => {
-            if (state.user) {
-                state.user = { ...state.user, ...action.payload }
-            }
+        clearSuccess: (state) => {
+            state.success = false;
+        },
+        clearUser: (state) => {
+            state.user = null;
         }
     },
     extraReducers: (builder) => {
         builder
+            // register
             .addCase(register.pending, (state) => {
                 state.isLoading = true
                 state.error = null
@@ -154,6 +208,7 @@ export const authSlice = createSlice({
                 state.error = action.payload
             })
 
+            // login
             .addCase(login.pending, (state) => {
                 state.isLoading = true
                 state.error = null
@@ -171,6 +226,7 @@ export const authSlice = createSlice({
                 state.token = null
             })
 
+            // get profile
             .addCase(getProfile.pending, (state) => {
                 state.isLoading = true
                 state.error = null
@@ -188,20 +244,59 @@ export const authSlice = createSlice({
                 localStorage.removeItem('token')
             })
 
+            // logout
             .addCase(logout.fulfilled, (state) => {
                 state.user = null
                 state.token = null
                 state.error = null
                 state.isLoading = false
+                state.success = false // reset success state
             })
             .addCase(logout.rejected, (state) => {
                 state.user = null
                 state.token = null
                 state.error = null
                 state.isLoading = false
+                state.success = false // reset success state
             })
+
+            // update profile
+            .addCase(updateProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+                state.success = false;
+            })
+            .addCase(updateProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.success = true;
+                state.user = { ...state.user, ...action.payload };
+                state.error = null;
+            })
+            .addCase(updateProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+                state.success = false;
+            })
+
+            // update gambar
+            .addCase(updateProfileImage.pending, (state) => {
+                state.uploading = true;
+                state.error = null;
+                state.success = false;
+            })
+            .addCase(updateProfileImage.fulfilled, (state, action) => {
+                state.uploading = false;
+                state.success = true;
+                state.user.image = action.payload;
+                state.error = null;
+            })
+            .addCase(updateProfileImage.rejected, (state, action) => {
+                state.uploading = false;
+                state.error = action.payload;
+                state.success = false;
+            });
     }
 })
 
-export const { clearError, updateProfile } = authSlice.actions
+export const { clearError, clearSuccess, clearUser } = authSlice.actions
 export default authSlice.reducer
