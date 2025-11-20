@@ -31,14 +31,14 @@ export const login = createAsyncThunk(
     "auth/login",
     async (form) => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/users?email=${form.email}&password=${form.password}`)
+            const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/login`, form)
             const users = res.data
 
             if (users.length === 0) {
                 throw new Error("Email atau password salah")
             }
 
-            return users[0]
+
         } catch (error) {
             console.error("Login error:", error.message)
             throw error
@@ -49,6 +49,11 @@ export const login = createAsyncThunk(
 export const logout = createAsyncThunk(
     "auth/logout",
     async () => {
+        await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/logout`, {
+            header: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        })
         localStorage.removeItem('persist:root')
         return null
     }
