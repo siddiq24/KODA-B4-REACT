@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Register from './pages/auth/Register'
 import LandingPage from './pages/landing/LandingPage'
@@ -17,14 +17,17 @@ import OrderList from './pages/admin/OrderList'
 import UserList from './pages/admin/UserList'
 import Login from './pages/auth/Login'
 import ForgotPassword from './pages/auth/ForgotPassword'
-import { ToastContainer } from 'react-toastify'
+import { toast, ToastContainer } from 'react-toastify'
 import { FilterContext } from './context/filterContext'
 import FilterSidebar from './components/FilterSidebar'
+import { useDispatch, useSelector } from 'react-redux'
+import { logout } from './redux/slice/AuthSlice'
 
 function AppRouter() {
     return (
         <BrowserRouter>
             <ToastContainer />
+            <ScrollRestoration />
             <Routes>
                 <Route path='/auth' element={<Outlet />}>
                     <Route path='register' element={<Register />} />
@@ -35,12 +38,14 @@ function AppRouter() {
                     <Route path='' element={<LandingPage />} />
                     <Route path='products' element={<ProductsPage />} />
                     <Route path='product/:id/detail' element={<DetailProduct />} />
-                    <Route path='/order'>
+                    <Route path='/order' element={<TimerToken />}>
                         <Route path='payment' element={<PaymentDetails />} />
-                        <Route path='history' element={<HistoryOrder />} />
-                        <Route path='detail' element={<DetailOrder />} />
                     </Route>
-                    <Route path='profile' element={<Profile />} />
+                    <Route path='profile' element={<TimerToken />}>
+                        <Route path='' element={<Profile />} />
+                        <Route path='order-history' element={<HistoryOrder />} />
+                        <Route path='order-detail' element={<DetailOrder />} />
+                    </Route>
                     <Route path='/admin' element={<AdminLayout />} >
                         <Route path='dashboard' element={<Dashboard />} />
                         <Route path='product' element={<ProductList />} />
@@ -61,6 +66,7 @@ const Layout = () => {
         <FilterContext.Provider value={{ filterOpen, setFilterOpen }}>
             <div className="relative min-h-screen scroll-smooth">
                 <Navbar isOpen={isOpen} setIsOpen={setIsOpen} />
+                <ScrollRestoration />
                 <Outlet />
 
                 {filterOpen && (
@@ -155,6 +161,36 @@ const AdminLayout = () => {
             </div>
         </div>
     )
+}
+
+const TimerToken = () => {
+    const { expToken } = useSelector(state => state.auth)
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+    console.log("expToken", expToken)
+    useEffect(() => {
+        const now = new Date().getTime()
+        console.log("now:", now)
+        if (now > expToken) {
+            toast("Masa token telah berakhir")
+            dispatch(logout())
+            navigate("/")
+        }
+    })
+
+    return (
+        <>
+            <Outlet />
+        </>
+    )
+}
+
+const ScrollRestoration = () => {
+    const { pathname } = useLocation()
+    useEffect(() => {
+        scrollTo(0, 0)
+    }, [pathname])
+    return null
 }
 
 export default AppRouter
