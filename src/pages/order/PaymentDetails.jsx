@@ -32,9 +32,9 @@ export default function PaymentDetails() {
         if (user) {
             setFormData(prev => ({
                 ...prev,
-                email: user.email || "",
-                fullName: user.fullname || "",
-                address: user.address || ""
+                email: user?.email || "",
+                fullName: user?.fullname || "",
+                address: user?.address || ""
             }));
         }
     }, [user]);
@@ -96,10 +96,10 @@ export default function PaymentDetails() {
         setLoading(true);
         try {
             const transactionData = {
-                name: user.fullname,
-                address: user.address,
-                phone: user.phone,
-                email: user.email,
+                name: user?.fullname,
+                address: user?.address,
+                phone: user?.phone,
+                email: user?.email,
                 payment_method_id: pay,
                 delivery_id: delivery
             };
@@ -119,8 +119,8 @@ export default function PaymentDetails() {
 
 
     const totalOrder = cartItems.reduce((total, item) => total + (item.subtotal || 0), 0);
-    const tax = totalOrder * 0.1;
-    const deliveryCost = delivery === "Door Delivery" ? 10000 : 0;
+    const tax = pay == 4 ? 0 : totalOrder * 0.1;
+    const deliveryCost = delivery === 2 ? 10000 : 0;
     const subTotal = totalOrder + tax + deliveryCost;
 
     const formatCurrency = (amount) => {
@@ -238,6 +238,7 @@ export default function PaymentDetails() {
                                         onChange={handleInputChange}
                                         placeholder="Enter Your Email"
                                         className="pl-12 md:text-lg w-full border border-gray-300 rounded-md p-2 focus:outline-[#ff8906]"
+                                        disabled={user?.email != null}
                                         required
                                     />
                                 </div>
@@ -254,6 +255,7 @@ export default function PaymentDetails() {
                                         onChange={handleInputChange}
                                         placeholder="Enter Your Full Name"
                                         className="pl-12 md:text-lg w-full border border-gray-300 rounded-md p-2 focus:outline-[#ff8906]"
+                                        disabled={user?.fullname != null}
                                         required
                                     />
                                 </div>
@@ -270,6 +272,7 @@ export default function PaymentDetails() {
                                         onChange={handleInputChange}
                                         placeholder="Enter Your Address"
                                         className="pl-12 md:text-lg w-full border border-gray-300 rounded-md p-2 focus:outline-[#ff8906]"
+                                        disabled={user?.address != null}
                                         required
                                     />
                                 </div>
