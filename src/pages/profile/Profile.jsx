@@ -24,7 +24,7 @@ export default function Profile() {
         formState: { errors, isDirty }
     } = useForm({
         defaultValues: {
-            name: userFromRedux?.full_name,
+            name: userFromRedux?.fullname,
             email: userFromRedux?.email,
             phone: userFromRedux?.phone,
             password: "*************",
