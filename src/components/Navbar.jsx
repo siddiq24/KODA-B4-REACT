@@ -40,7 +40,7 @@ function Navbar({ isOpen, setIsOpen }) {
                 <label htmlFor="search-product" className='hidden md:block'>
                     <Search color='#fff' strokeWidth={1} size={30} />
                 </label>
-                <Link to={'/'} className=''>
+                <Link to={'/order/payment'} className=''>
                     <ShoppingCart color='#fff' strokeWidth={1} size={30} />
                 </Link>
                 <div onClick={() => { setIsOpen(!isOpen) }}
