@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, Minus, Plus, ShoppingCart, Star, ThumbsUp } from "lucide-react";
+import { ArrowLeft, ArrowRight, Minus, Plus, ShoppingCart, Star, ThumbsUp } from "lucide-react";
 import ProductCard from "../../components/ProductCard";
 import { useParams } from "react-router";
 import axios from "axios";
@@ -9,6 +9,7 @@ export default function DetailProduct() {
     const [selectedSize, setSelectedSize] = useState(null);
     const [temp, setTemp] = useState(null);
     const [page, setPage] = useState(1);
+    const [totalPage, setTotalPage] = useState(1);
     const [product, setProduct] = useState({})
     const [products, setProducts] = useState([])
     const { id } = useParams('id')
@@ -22,25 +23,26 @@ export default function DetailProduct() {
                 if (res.data.result?.sizes?.[0]) {
                     setSelectedSize(res.data.result[0].sizes[0])
                 }
+                console.log(res.data.result)
             } catch (error) {
                 console.log("Error fetching product:", error)
             }
         })()
     }, [id])
 
-    console.log(product)
 
     useEffect(() => {
         (async () => {
             try {
-                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products/${id}/recomendation`)
-                setProducts(res.data.result || res.data || [])
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/products/${id}/recomendation?limit=4&page=${page}`)
+                setProducts(res.data.result || [])
+                setTotalPage(res.data?.totalPage || 1)
+                console.log(res.data)
             } catch (error) {
                 console.log("Error fetching products:", error)
             }
         })()
-    }, [id])
-
+    }, [id, page])
 
     const discount = product?.discount?.Valid ? product.discount.Float64 : 0
     const discountAmount = product?.price ? (product.price * discount / 100) : 0
@@ -55,11 +57,16 @@ export default function DetailProduct() {
     }
 
     const handleQty = (type) => {
-        setQty((prev) => (type === "plus" ? prev + 1 : prev > 1 ? prev - 1 : 1));
+        setQty((prev) => {
+            if (type === "plus") {
+                return prev < 5 ? prev + 1 : 5;
+            } else {
+                return prev > 1 ? prev - 1 : 1;
+            }
+        });
     };
 
     const handleAddToCart = () => {
-
         const cartItem = {
             productId: product.id,
             title: product.title,
@@ -72,13 +79,10 @@ export default function DetailProduct() {
             image: product.images?.[0]
         }
         console.log("Add to cart:", cartItem)
-
     }
 
     const handleBuyNow = () => {
-
         handleAddToCart()
-
     }
 
     return (
@@ -236,23 +240,37 @@ export default function DetailProduct() {
                 </div>
             </section>
 
-            {products.length > 4 && (
+            {totalPage > 1 && (
                 <section className='w-full h-22 mt-8 flex gap-3 justify-center items-center'>
-                    {[1, 2, 3, 4].map(i => (
+                    <div
+                        onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                        className={`aspect-square h-12 rounded-full flex justify-center items-center cursor-pointer transition-colors ${page > 1
+                            ? 'bg-[#ff8906] hover:bg-orange-600'
+                            : 'bg-gray-300 cursor-not-allowed'
+                            }`}
+                    >
+                        <ArrowLeft color={page > 1 ? 'white' : 'gray'} />
+                    </div>
+
+                    {Array.from({ length: totalPage }, (_, i) => i + 1).map((pageNum) => (
                         <div
-                            key={i}
-                            onClick={() => setPage(i)}
-                            className={`aspect-square h-12 cursor-pointer ${page === i ? 'bg-[#ff8906]' : 'bg-gray-400'
+                            key={pageNum}
+                            onClick={() => setPage(pageNum)}
+                            className={`aspect-square h-12 cursor-pointer ${page === pageNum ? 'bg-[#ff8906] text-white' : 'bg-gray-200 hover:bg-gray-300'
                                 } rounded-full flex justify-center items-center transition-colors`}
                         >
-                            {i}
+                            {pageNum}
                         </div>
                     ))}
+
                     <div
-                        onClick={() => setPage(prev => prev + 1)}
-                        className='aspect-square h-12 bg-[#ff8906] rounded-full flex justify-center items-center cursor-pointer hover:bg-orange-600 transition-colors'
+                        onClick={() => setPage(prev => Math.min(prev + 1, totalPage))}
+                        className={`aspect-square h-12 rounded-full flex justify-center items-center cursor-pointer transition-colors ${page < totalPage
+                            ? 'bg-[#ff8906] hover:bg-orange-600'
+                            : 'bg-gray-300 cursor-not-allowed'
+                            }`}
                     >
-                        <ArrowRight color='white' />
+                        <ArrowRight color={page < totalPage ? 'white' : 'gray'} />
                     </div>
                 </section>
             )}
