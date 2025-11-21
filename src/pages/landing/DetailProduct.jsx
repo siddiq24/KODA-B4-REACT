@@ -106,10 +106,10 @@ export default function DetailProduct() {
             const res = await axios.post(
                 `${import.meta.env.VITE_BASE_URL}/cart`,
                 {
-                    product_id: parseInt(id),
-                    size_id: selectedSize,
+                    productId: parseInt(id),
+                    sizeId: selectedSize,
                     quantity: qty,
-                    varian_id: selectedVariant,
+                    varianId: selectedVariant,
                 },
                 {
                     headers: {
