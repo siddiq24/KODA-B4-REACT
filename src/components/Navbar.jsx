@@ -9,23 +9,32 @@ function Navbar({ isOpen, setIsOpen }) {
     const [click, setClick] = useState(false)
     const navigate = useNavigate()
     const { user } = useSelector(state => state.auth)
-    const isActive = (path) => {
-        if (location.pathname === path) {
+    const isActive = (path, not = location.pathname) => {
+        if (location.pathname === path || location.pathname !== not) {
             return 'border-[#ff8906] text-[#ff8906]'
         } else {
             return 'border-gray-300 text-white'
         }
     }
     return (
-        <div className='w-full flex p-3 px-5 fixed backdrop-brightness-50 backdrop-blur-md z-3 md:px-[5%] lg:px-[6%] md:py-6'>
+        <div className={`w-full flex p-3 px-5 fixed ${location.pathname.slice(0, 8) === "/profile" ? "backdrop-brightness-20" : "backdrop-brightness-50"} backdrop-blur-md z-3 md:px-[5%] lg:px-[6%] md:py-6`}>
             <div className='flex gap-3 md:w-[45%] justify-between items-center md:min-w-88'>
                 <div
                     onClick={() => navigate('/')}
                     className='h-fit pb-3 w-[30%]'>
                     <Logo color={'#fff'} className={'h-8 md:w-[150px] md:h-auto'} />
                 </div>
-                <div className={`h-fit border-b text-center pb-3 hidden md:block w-fit ${isActive('/')}`}><Link to="/" className="lg:text-xl hover:text-[#ff8906] transition-colors">Home</Link></div>
-                <div className={`h-fit border-b text-center pb-3 hidden md:block w-fit ${isActive('/products')}`}><Link to="/products" className="lg:text-xl hover:text-[#ff8906] transition-colors">Product</Link></div>
+                {
+                    location.pathname == "/profile" || location.pathname.slice(0, 8) == "/profile"
+                        ? <>
+                            <div className={`h-fit border-b text-center pb-3 hidden md:block w-fit ${isActive('/profile')}`}><Link to="/profile" className="lg:text-xl hover:text-[#ff8906] transition-colors">Profile</Link></div>
+                            <div className={`h-fit border-b text-center pb-3 hidden md:block w-fit ${isActive('/profile/order-history', '/profile')}`}><Link to="/profile/order-history" className="lg:text-xl hover:text-[#ff8906] transition-colors">History</Link></div>
+                        </>
+                        : <>
+                            <div className={`h-fit border-b text-center pb-3 hidden md:block w-fit ${isActive('/')}`}><Link to="/" className="lg:text-xl hover:text-[#ff8906] transition-colors">Home</Link></div>
+                            <div className={`h-fit border-b text-center pb-3 hidden md:block w-fit ${isActive('/products')}`}><Link to="/products" className="lg:text-xl hover:text-[#ff8906] transition-colors">Product</Link></div>
+                        </>
+                }
 
             </div>
             <div className='w-full flex justify-end items-center gap-6 md:pl-10'>
