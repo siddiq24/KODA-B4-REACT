@@ -142,7 +142,7 @@ export default function Profile() {
                         </p>
                         <div className="relative">
                             <img
-                                src={userFromRedux.image}
+                                src={userFromRedux?.image}
                                 alt="Profile"
                                 className="w-32 h-32 rounded-full object-cover border border-gray-300 mb-4"
                                 onError={(e) => {
