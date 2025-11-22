@@ -4,22 +4,28 @@ import axios from "axios";
 import { Link } from "react-router";
 
 export default function HistoryOrder() {
-    const [status, setStatus] = useState("On Progress");
-    const [month, setMonth] = useState("January 2023");
+    const [month, setMonth] = useState(new Date().getMonth() + 1);
     const [orders, setOrders] = useState([]);
+    const [totalOrders, setTotalOrders] = useState([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [filter, setFilter] = useState({
+        limit: 5,
+        status: 1,
+    })
 
     useEffect(() => {
         const fetchHistory = async () => {
+            console.log(page, filter.limit, filter.status, month)
             try {
                 setLoading(true);
-                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/transactions/history`)
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/transactions/history?page=${page}&limit=${filter.limit}&status=${filter.status}&month=${month}`)
                 console.log("History data:", res.data);
 
                 if (res.data.success) {
                     setOrders(res.data.result);
+                    setTotalOrders(res.data.totalOrder);
                 } else {
                     setError("Failed to fetch history");
                 }
@@ -32,15 +38,21 @@ export default function HistoryOrder() {
         };
 
         fetchHistory();
-    }, []);
+    }, [filter, page, month]);
 
+    function BulanKe(ke = 0) {
+        let date = new Date();
+        let Bulan = "";
+        const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
-    const filteredOrders = orders.filter(order => {
-        if (status === "On Progress") return order.status === "Pending";
-        if (status === "Sending Goods") return order.status === "Shipping";
-        if (status === "Finish Order") return order.status === "Completed";
-        return true;
-    });
+        date.setMonth(date.getMonth() - ke);
+
+        let namabulan = namaBulan[date.getMonth()];
+        let year = date.getFullYear();
+
+        return Bulan += `${namabulan} - ${year}`;
+    }
 
     if (loading) {
         return (
@@ -63,23 +75,23 @@ export default function HistoryOrder() {
     }
 
     return (
-        <section className="w-full px-4 md:px-12 py-8 space-y-8 pt-28">
+        <section className="w-full px-4 md:px-12 py-8 space-y-8 pt-40">
             {/* Title */}
-            <div className="flex items-center gap-2 justify-between">
+            <div className="flex items-center gap-2 justify-start">
                 <h1 className="text-3xl">History Order</h1>
                 <span className="bg-gray-200 text-gray-700 text-sm font-medium px-2 py-1 rounded-md">
-                    {filteredOrders.length}
+                    {totalOrders}
                 </span>
             </div>
 
             {/* Filter Tabs */}
             <div className="flex flex-col-reverse md:flex-row lg:w-[66%] md:items-center md:justify-between gap-4">
                 <div className="flex gap-2 bg-gray-200 p-3 md:flex-3">
-                    {["On Progress", "Sending Goods", "Finish Order"].map((item) => (
+                    {["On Progress", "Sending Goods", "Finish Order"].map((item, i) => (
                         <button
-                            key={item}
-                            onClick={() => setStatus(item)}
-                            className={`p-2 w-full text-nowrap text-sm font-medium rounded-md transition ${status === item
+                            key={i}
+                            onClick={() => setFilter({ ...filter, status: i + 1 })}
+                            className={`p-2 w-full text-nowrap text-sm font-medium rounded-md transition ${filter.status === i + 1
                                 ? "bg-white"
                                 : "hover:bg-gray-100"
                                 }`}
@@ -97,9 +109,9 @@ export default function HistoryOrder() {
                         onChange={(e) => setMonth(e.target.value)}
                         className="bg-transparent outline-none text-sm"
                     >
-                        <option>September 2025</option>
-                        <option>October 2025</option>
-                        <option>November 2025</option>
+                        <option value={new Date().getMonth() + 1}>{BulanKe()}</option>
+                        <option value={new Date().getMonth()}>{BulanKe(1)}</option>
+                        <option value={new Date().getMonth() - 1}>{BulanKe(2)}</option>
                     </select>
                 </div>
             </div>
@@ -108,13 +120,13 @@ export default function HistoryOrder() {
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Orders List */}
                 <div className="flex-7 space-y-4">
-                    {filteredOrders.length === 0 ? (
+                    {totalOrders === 0 ? (
                         <div className="flex justify-center items-center h-40">
                             <p className="text-gray-600">No orders found for the selected filter.</p>
                         </div>
                     ) : (
                         <>
-                            {filteredOrders.map((order) => (
+                            {orders?.map((order) => (
                                 <div
                                     key={order.id}
                                     className="flex items-center gap-4 bg-gray-100 shadow-sm border border-gray-100 rounded-xl p-3"
@@ -170,7 +182,7 @@ export default function HistoryOrder() {
                             ))}
 
                             {/* Pagination */}
-                            {orders.length > 1 && (
+                            {Math.ceil(totalOrders / filter.limit) > 1 && (
                                 <section className='w-full h-22 mt-8 flex gap-3 justify-center items-center'>
                                     <button
                                         onClick={() => setPage(prev => Math.max(prev - 1, 1))}
