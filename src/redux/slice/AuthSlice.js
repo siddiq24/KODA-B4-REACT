@@ -12,6 +12,7 @@ const initialState = {
     error: null,
     success: false,
     token: localStorage.getItem('token') || null,
+    expToken: null
 }
 
 const setAuthHeader = (token) => {
@@ -218,6 +219,7 @@ export const authSlice = createSlice({
                 state.user = action.payload.user
                 state.token = action.payload.token
                 state.error = null
+                state.expToken = new Date().getTime() + 60 * 5 * 1000
             })
             .addCase(login.rejected, (state, action) => {
                 state.isLoading = false
