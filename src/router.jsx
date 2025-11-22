@@ -44,7 +44,7 @@ function AppRouter() {
                     <Route path='profile' element={<TimerToken />}>
                         <Route path='' element={<Profile />} />
                         <Route path='order-history' element={<HistoryOrder />} />
-                        <Route path='order-detail' element={<DetailOrder />} />
+                        <Route path='order-detail/:invoice' element={<DetailOrder />} />
                     </Route>
                     <Route path='/admin' element={<AdminLayout />} >
                         <Route path='dashboard' element={<Dashboard />} />
@@ -61,6 +61,17 @@ function AppRouter() {
 const Layout = () => {
     const [isOpen, setIsOpen] = useState(false)
     const [filterOpen, setFilterOpen] = useState(false)
+    const { expToken, user } = useSelector(state => state.auth)
+    const dispatch = useDispatch()
+    console.log("expToken", expToken)
+    useEffect(() => {
+        const now = new Date().getTime()
+        console.log("now:", now)
+        if (now > expToken && user != null) {
+            toast("Masa token telah berakhir")
+            dispatch(logout())
+        }
+    })
 
     return (
         <FilterContext.Provider value={{ filterOpen, setFilterOpen }}>
