@@ -1,74 +1,39 @@
-import React, { useState } from "react";
-import { Pencil, Trash2, Plus, Search, Filter } from "lucide-react";
+
+import React, { useEffect, useState, useCallback } from "react";
+import { Pencil, Trash2, Plus, Search, Filter, X, Upload, ImagePlus } from "lucide-react";
+import { useSelector } from "react-redux";
 import ProductSidebar from "../../components/ProductSidebar";
+import axios from "axios";
+import { toast } from "react-toastify";
+import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 
 const ProductList = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [editData, setEditData] = useState(null);
-    console.log(editData)
+    const [loading, setLoading] = useState(false);
+    const [products, setProducts] = useState([]);
+    const { token } = useSelector(state => state.auth)
+    const [openConfirm, setOpenConfirm] = useState(false);
+    const [productDelete, setProductDelete] = useState({ id: 0, name: "" })
 
-    const products = [
-        {
-            id: 1,
-            name: "Caramel Machiato",
-            price: "IDR 40.000",
-            desc: "Cold brewing is a method of brewing that ...",
-            size: ["R","L","XL","250gr"],
-            method: "Deliver, Dine In",
-            stock: 200,
-            images:
-                ["https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=100&q=60"],
-        },
-        {
-            id: 2,
-            name: "Hazelnut Latte",
-            price: "IDR 40.000",
-            desc: "Cold brewing is a method of brewing that ...",
-            size: ["R","L","XL","250gr"],
-            method: "Deliver, Dine In",
-            stock: 200,
-            images:
-                ["https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=100&q=60"],
-        },
-        {
-            id: 3,
-            name: "Kopi Susu",
-            price: "IDR 40.000",
-            desc: "Cold brewing is a method of brewing that ...",
-            size: ["R","L","XL","250gr"],
-            method: "Dine In",
-            stock: 200,
-            images:
-                ["https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=100&q=60"],
-        },
-        {
-            id: 4,
-            name: "Espresso Supreme",
-            price: "IDR 40.000",
-            desc: "Cold brewing is a method of brewing that ...",
-            size: ["R","L","XL","250gr"],
-            method: "Deliver",
-            stock: 200,
-            images:
-                ["https://images.unsplash.com/photo-1528834356921-1e03a878ea63?auto=format&fit=crop&w=100&q=60"],
-        },
-        {
-            id: 5,
-            name: "Caramel Velvet Latte",
-            price: "IDR 40.000",
-            desc: "Cold brewing is a method of brewing that ...",
-            size: ["R","L","XL","250gr"],
-            method: "Deliver, Dine In",
-            stock: 200,
-            images:
-                ["https://images.unsplash.com/photo-1579999569032-c31e8aa3d7c2?auto=format&fit=crop&w=100&q=60"],
-        },
-    ];
+    const handleSearch = useCallback(async (search = "") => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/admin/products?search=${search}&limit=5`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setProducts(response.data.result || []);
+        } catch (error) {
+            console.error("Search failed:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
 
-    const filteredProducts = products.filter((product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    useEffect(() => {
+        handleSearch("");
+    }, [handleSearch]);
 
     const handleAdd = () => {
         setEditData(null);
@@ -80,8 +45,25 @@ const ProductList = () => {
         setIsSidebarOpen(true);
     };
 
-    const handleSave = (data) => {
-        console.log("Saved data:", data);
+    const handleSave = useCallback(() => {
+        handleSearch(searchTerm);
+        setIsSidebarOpen(false);
+    }, [handleSearch, searchTerm]);
+
+    const deleteProduct = async (id) => {
+        try {
+            await fetch(`${import.meta.env.VITE_BASE_URL}/admin/products/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            handleSearch(searchTerm);
+            setOpenConfirm(false)
+        } catch (error) {
+            console.error("Delete failed:", error);
+            toast.error("Failed to delete product");
+        }
     };
 
     return (
@@ -100,9 +82,12 @@ const ProductList = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <button className="bg-[#ff8906] hover:bg-orange-500 text-white px-4 py-3 rounded-lg flex items-center gap-2">
+                    <button
+                        onClick={() => handleSearch(searchTerm)}
+                        disabled={loading}
+                        className="bg-[#ff8906] hover:bg-orange-500 text-white px-4 py-3 rounded-lg flex items-center gap-2 whitespace-nowrap disabled:opacity-50">
                         <Filter />
-                        <span>Filter</span>
+                        <span>{loading ? 'Loading...' : 'Filter'}</span>
                     </button>
                 </div>
             </div>
@@ -116,61 +101,67 @@ const ProductList = () => {
             </div>
 
             <div className="bg-white shadow rounded-xl overflow-x-auto">
-                <table className="w-full text-left text-gray-700">
-                    <thead className="bg-gray-50 text-center">
-                        <tr>
-                            <th className="p-4"></th>
-                            <th className="p-4">Image</th>
-                            <th className="p-4">Product Name</th>
-                            <th className="p-4">Price</th>
-                            <th className="p-4 text-center">Desc</th>
-                            <th className="p-4">Product Size</th>
-                            <th className="p-4 text-center">Method</th>
-                            <th className="p-4 text-center">Stock</th>
-                            <th className="p-4 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-center">
-                        {filteredProducts.map((product, i) => (
-                            <tr
-                                key={product.id}
-                                className={`border-t border-gray-300 transition-colors ${i % 2 == 0 && 'bg-gray-100'}`}
-                            >
-                                <td className="p-4">
-                                    <input type="checkbox" />
-                                </td>
-                                <td className="p-4">
-                                    <img
-                                        src={product.images[0]}
-                                        alt={product.name}
-                                        className="w-14 h-14 object-cover rounded-md"
-                                    />
-                                </td>
-                                <td className="p-4 font-medium">{product.name || ''}</td>
-                                <td className="p-4">{product.price || ''}</td>
-                                <td className="p-4 text-sm text-gray-500">{product.desc || ''}</td>
-                                <td className="p-4">{product.size || ''}</td>
-                                <td className="p-4 text-center">{product.method || ''}</td>
-                                <td className="p-4 text-center">{product.stock || ''}</td>
-                                <td className="p-8 flex gap-5 items-center justify-center">
-                                    <button onClick={() => handleEdit(product)}
-                                        className="text-[#ff8906] hover:text-orange-500 bg-[#ff8906]/20 p-2 rounded-full">
-                                        <Pencil size={22} />
-                                    </button>
-                                    <button className="text-red-500 hover:text-red-600 bg-red-500/20 p-2 rounded-full">
-                                        <Trash2 size={22} />
-                                    </button>
-                                </td>
+                <div className="overflow-x-auto overflow-y-auto flex-1">
+                    <table className="w-full text-left text-gray-700 min-w-[1000px]">
+                        <thead className="bg-gray-50 text-center sticky top-0">
+                            <tr>
+                                <th className="p-4">Image</th>
+                                <th className="p-4">Product Name</th>
+                                <th className="p-4">Price</th>
+                                <th className="p-4 text-center">Description</th>
+                                <th className="p-4">Product Size</th>
+                                <th className="p-4 text-center">Stock</th>
+                                <th className="p-4 text-center">Action</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="text-center">
+                            {products?.map((product, i) => (
+                                <tr
+                                    key={product.id}
+                                    className={`border-t border-gray-300 transition-colors ${i % 2 === 0 && 'bg-gray-100'}`}
+                                >
+                                    <td className="p-4">
+                                        <img
+                                            src={product.images[0]?.image}
+                                            alt={product.title}
+                                            className="w-14 h-14 object-cover rounded-md mx-auto"
+                                        />
+                                    </td>
+                                    <td className="p-4 font-medium">{product.title || ''}</td>
+                                    <td className="p-4">Rp {product.basePrice?.toLocaleString() || ''}</td>
+                                    <td className="p-4 text-sm text-gray-500 max-w-[200px] truncate">
+                                        {product.description || '......'}
+                                    </td>
+                                    <td className="p-4">{product.sizes?.map(size => size.name).join(", ")}</td>
+                                    <td className="p-4 text-center">{product.stock || ''}</td>
+                                    <td className="p-4">
+                                        <div className="flex gap-2 items-center justify-center">
+                                            <button
+                                                onClick={() => handleEdit(product)}
+                                                className="text-[#ff8906] hover:text-orange-500 bg-[#ff8906]/20 p-2 rounded-full">
+                                                <Pencil size={22} />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setProductDelete({ id: product.id, name: product.title })
+                                                    setOpenConfirm(true)
+                                                }
+                                                }
+                                                className="text-red-500 hover:text-red-600 bg-red-500/20 p-2 rounded-full">
+                                                <Trash2 size={22} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
-                <div className="flex justify-between items-center p-6 text-sm text-gray-500">
-                    <span>Show 5 product of 100 product</span>
-                    <div className="flex items-center gap-2">
-                        <button className="hover:text-orange-500">Prev</button>
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                <div className="flex flex-col sm:flex-row justify-between items-center p-6 text-sm text-gray-500 border-t gap-4">
+                    <div className="flex items-center gap-2 flex-wrap justify-center">
+                        <button className="hover:text-orange-500 px-2">Prev</button>
+                        {.map((num) => (
                             <button
                                 key={num}
                                 className={`w-7 h-7 rounded-md ${num === 1
@@ -190,6 +181,12 @@ const ProductList = () => {
                     productData={editData}
                     onSave={handleSave}
                 />}
+                <ConfirmDeleteModal
+                    open={openConfirm}
+                    onClose={() => setOpenConfirm(false)}
+                    onConfirm={() => deleteProduct(productDelete.id)}
+                    productName={productDelete.name}
+                />
             </div>
         </div>
     );
