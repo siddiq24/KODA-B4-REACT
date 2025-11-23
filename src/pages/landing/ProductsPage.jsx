@@ -6,12 +6,11 @@ import { FilterContext } from '../../context/filterContext';
 import FilterSidebar from '../../components/FilterSidebar';
 
 function ProductsPage() {
-    const [page, setPage] = useState(1)
-    const [products, setProducts] = useState([])
-    const { filterOpen, setFilterOpen } = useContext(FilterContext)
-    // const [filter, setFilter] = useState()
-    const [search, setSearch] = useState("")
-    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [page, setPage] = useState(1);
+    const [products, setProducts] = useState([]);
+    const [search, setSearch] = useState("");
+    const [, setLoading] = useState(false);
+    const { filterOpen, setFilterOpen } = useContext(FilterContext);
 
     const promos = [
         {
@@ -35,50 +34,25 @@ function ProductsPage() {
             desc: 'Get one of our favorite menu for free',
             bg: 'bg-[#88B788]'
         },
-        {
-            id: 3,
-            img: '/promo1.png',
-            title: "HAPPY MOTHER'S DAY",
-            desc: 'Get one of our favorite menu for free',
-            bg: 'bg-[#88B788]'
-        },
-        {
-            id: 4,
-            img: '/promo1.png',
-            title: "HAPPY MOTHER'S DAY",
-            desc: 'Get one of our favorite menu for free',
-            bg: 'bg-[#88B788]'
-        },
-    ]
+    ];
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`);
+            setProducts(response.data.result || []);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            setProducts([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        axios.get(`${import.meta.env.VITE_BASE_URL}/products`)
-            .then(res => setProducts(res.data.result))
-            .catch(err => console.log(err));
+        fetchProducts();
     }, []);
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearch(search);
-        }, 500);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [search]);
-
-    useEffect(() => {
-        if (debouncedSearch === "") return;
-
-        console.log("Kirim search ke API:", debouncedSearch);
-
-        axios.get(`${import.meta.env.VITE_BASE_URL}/products?search=${debouncedSearch}`)
-            .then(res => setProducts(res.data.result))
-            .catch(err => console.log(err));
-
-    }, [debouncedSearch]);
-
-    console.log(products)
     return (
         <div className='space-y-6 overflow-hidden px-[5%] md:p-0'>
             <section className='hidden md:block'>
@@ -107,10 +81,10 @@ function ProductsPage() {
                 <h1 className='text-4xl md:px-[10%]'>Today <span className='text-[#ff8906]'>Promo</span></h1>
                 <Card data={promos} />
             </section>
-            <section className='space-y-6 md:px-[10%] '>
+            <section className='space-y-6 md:px-[10%] border'>
                 <h1 className='text-4xl'>Our <span className='text-[#ff8906]'>Product</span></h1>
                 <section className='md:flex gap-5'>
-                    <FilterSidebar className={'hidden md:block'} search={search} setSearch={setSearch} />
+                    <FilterSidebar className={'hidden md:block'} search={search} setSearch={setSearch} setProducts={setProducts} />
                     <div className='grid grid-cols-2 gap-6 md:flex-2'>
                         {
                             products?.map(i => {

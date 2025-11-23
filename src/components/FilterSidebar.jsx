@@ -1,23 +1,33 @@
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 
-export default function FilterSidebar({ className, search, setSearch }) {
-    const [selectedCategory, setSelectedCategory] = useState("Coffee");
-    const [selectedSort, setSelectedSort] = useState("Flash sale");
-    const [range, setRange] = useState([374, 500]);
+export default function FilterSidebar({ className, search, setSearch, setProducts }) {
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [selectedSort, setSelectedSort] = useState(null);
+    const [range, setRange] = useState([20000, 50000]);
+    const [, setLoading] = useState(false);
+    const [filterParams, setFilterParams] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState(search);
 
-    const categories = ["Favorite Product", "Coffee", "Non Coffee", "Foods", "Add-On"];
-    const sorts = ["Buy 1 get 1", "Flash sale", "Birthday Package", "Cheap"];
+    const categories = [
+        "Coffee", "Non Coffee", "Fruit Tea",
+        "Tea", "Food", "Ice Blended",
+        "Signature Coffee", "Origin Coffee"
+    ];
+
+    const sorts = ["Title [A-Z]", "Title [Z-A]", "Price [0-9]", "Price [9-0]"];
 
     const handleReset = () => {
         setSearch("");
-        setSelectedCategory("");
-        setSelectedSort("");
-        setRange([374, 500]);
+        setSelectedCategories([]);
+        setSelectedSort(null);
+        setRange([20000, 50000]);
+        setFilterParams("");
     };
     const rangeRef = useRef(null);
 
-    const min = 300;
-    const max = 600;
+    const min = 10000;
+    const max = 100000;
 
     useEffect(() => {
         if (rangeRef.current) {
@@ -37,6 +47,58 @@ export default function FilterSidebar({ className, search, setSearch }) {
         const value = Math.max(+e.target.value, range[0] + 10);
         setRange([range[0], value]);
     };
+
+    const toggleCategory = (id) => {
+        setSelectedCategories(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+        return () => clearTimeout(delay);
+    }, [search]);
+
+    const fetchFilteredProducts = async () => {
+        setLoading(true);
+
+        let query = `?search=${encodeURIComponent(debouncedSearch)}`;
+
+        selectedCategories.forEach(cat => {
+            query += `&cat=${cat}`;
+        });
+
+        if (selectedSort !== null) {
+            const sortMap = [
+                "&shortBy=title&asc=true",
+                "&shortBy=title",
+                "&shortBy=price&asc=true",
+                "&shortBy=price"
+            ];
+            query += sortMap[selectedSort];
+        }
+
+        query += `&minPrice=${range[0]}&maxPrice=${range[1]}`;
+
+        setFilterParams(query);
+
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products${query}`);
+            setProducts(response.data.result || []);
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            setProducts([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchFilteredProducts();
+    }, [debouncedSearch, selectedCategories, selectedSort]);
+
 
     return (
         <div className={`rounded-3xl flex-1 bg-black text-white h-fit p-6 space-y-6 ${className}`}>
@@ -61,12 +123,12 @@ export default function FilterSidebar({ className, search, setSearch }) {
             <div>
                 <p className="font-semibold mb-2 text-xl">Category</p>
                 <div className="space-y-4 pl-4">
-                    {categories.map((item) => (
-                        <label key={item} className="flex items-center gap-2 cursor-pointer">
+                    {categories.map((item, i) => (
+                        <label key={i} className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="checkbox"
-                                checked={selectedCategory === item}
-                                onChange={() => setSelectedCategory(item)}
+                                checked={selectedCategories.includes(i + 1)}
+                                onChange={() => toggleCategory(i + 1)}
                                 className="appearance-none w-4 h-4 border border-gray-400 rounded bg-black checked:bg-orange-500 checked:border-[#ff8906] focus:ring-0"
                             />
                             <span className="font-extralight">{item}</span>
@@ -76,14 +138,15 @@ export default function FilterSidebar({ className, search, setSearch }) {
             </div>
 
             <div>
-                <p className="font-semibold mb-2 text-xl">Sort By</p>
-                <div className="space-y-4 pl-4">
-                    {sorts.map((item) => (
-                        <label key={item} className="flex items-center gap-2 cursor-pointer">
+                <p className="font-semibold text-xl mb-2">Sort By</p>
+                <div className="space-y-3 pl-4">
+                    {sorts.map((item, i) => (
+                        <label key={i} className="flex items-center gap-2">
                             <input
-                                type="checkbox"
-                                checked={selectedSort === item}
-                                onChange={() => setSelectedSort(item)}
+                                type="radio"
+                                name="sort"
+                                checked={selectedSort === i}
+                                onChange={() => setSelectedSort(i)}
                                 className="appearance-none w-4 h-4 border border-gray-400 rounded bg-black checked:bg-orange-500 checked:border-[#ff8906] focus:ring-0"
                             />
                             <span>{item}</span>
@@ -129,7 +192,9 @@ export default function FilterSidebar({ className, search, setSearch }) {
                 </div>
             </div>
 
-            <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 rounded-md">
+            <button
+                onClick={fetchFilteredProducts}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 rounded-md"            >
                 Apply Filter
             </button>
         </div>
