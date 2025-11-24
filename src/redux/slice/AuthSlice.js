@@ -6,6 +6,7 @@ const initialState = {
         image: ""
     },
     profile: null,
+    role: null,
     isLoading: false,
     loading: false,
     uploading: false,
@@ -73,7 +74,8 @@ export const login = createAsyncThunk(
 
             return {
                 user: profileRes.data.result,
-                token: token
+                token: token,
+                role: res.data.result.role
             }
         } catch (error) {
             console.error("Login error:", error.response?.data || error.message)
@@ -218,6 +220,7 @@ export const authSlice = createSlice({
                 state.isLoading = false
                 state.user = action.payload.user
                 state.token = action.payload.token
+                state.role = action.payload.role
                 state.error = null
                 state.expToken = new Date().getTime() + 60 * 5 * 1000
             })
@@ -250,6 +253,7 @@ export const authSlice = createSlice({
             .addCase(logout.fulfilled, (state) => {
                 state.user = null
                 state.token = null
+                state.role = null
                 state.error = null
                 state.isLoading = false
                 state.success = false // reset success state
@@ -258,6 +262,7 @@ export const authSlice = createSlice({
                 state.user = null
                 state.token = null
                 state.error = null
+                state.role = null
                 state.isLoading = false
                 state.success = false // reset success state
             })

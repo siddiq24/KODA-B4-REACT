@@ -43,6 +43,7 @@ function Register() {
             setLoading(false);
             return toast('Passwords do not match', { type: 'error', theme: 'dark' });
         }
+        console.log(form)
 
         try {
             const payload = {

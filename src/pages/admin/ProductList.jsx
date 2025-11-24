@@ -161,7 +161,7 @@ const ProductList = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-center p-6 text-sm text-gray-500 border-t gap-4">
                     <div className="flex items-center gap-2 flex-wrap justify-center">
                         <button className="hover:text-orange-500 px-2">Prev</button>
-                        {.map((num) => (
+                        {[].map((num) => (
                             <button
                                 key={num}
                                 className={`w-7 h-7 rounded-md ${num === 1
@@ -175,7 +175,7 @@ const ProductList = () => {
                         <button className="hover:text-orange-500">Next</button>
                     </div>
                 </div>
-                {editData && <ProductSidebar
+                {isSidebarOpen && <ProductSidebar
                     isOpen={isSidebarOpen}
                     onClose={() => setIsSidebarOpen(false)}
                     productData={editData}

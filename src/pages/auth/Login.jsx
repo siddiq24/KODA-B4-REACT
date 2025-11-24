@@ -4,14 +4,14 @@ import { Facebook, Google, Logo } from '../../svg/svg'
 import { Eye, EyeOff, KeyRound, Mail } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { login, clearError } from '../../redux/slice/AuthSlice'
+import { login, clearError, logout } from '../../redux/slice/AuthSlice'
 import { toast } from 'react-toastify'
 
 function Login() {
     const [form, setForm] = useState({ email: "", password: '' })
     const [showPassword, setShowPassword] = useState(false)
     const dispatch = useDispatch()
-    const { user, isLoading, error, token } = useSelector(state => state.auth)
+    const { user, isLoading, error, token, role } = useSelector(state => state.auth)
     const navigate = useNavigate()
     useEffect(() => {
         dispatch(clearError())
@@ -22,12 +22,13 @@ function Login() {
             dispatch(clearError())
         }
     }, [error, dispatch])
+    console.log("role", role)
     useEffect(() => {
-        if (user && token && !isLoading) {
-            const role = user.role || 'user'
+        if (user && role && !isLoading) {
             const userName = user.fullname
 
             toast.success(`Welcome back, ${userName}!`)
+            console.log("roleeeeeeeeeee: ", role)
 
             if (role === 'admin') {
                 navigate('/admin/dashboard', { replace: true })
@@ -35,7 +36,8 @@ function Login() {
                 navigate('/products', { replace: true })
             }
         }
-    }, [user, token, isLoading, navigate])
+    }, [user, token, isLoading, navigate, role])
+
 
     function handleChange(e) {
         const { name, value } = e.target
