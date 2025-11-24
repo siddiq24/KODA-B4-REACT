@@ -238,7 +238,7 @@ export default function PaymentDetails() {
                                         onChange={handleInputChange}
                                         placeholder="Enter Your Email"
                                         className="pl-12 md:text-lg w-full border border-gray-300 rounded-md p-2 focus:outline-[#ff8906]"
-                                        disabled={user?.email != null}
+                                        disabled={user?.email != ""}
                                         required
                                     />
                                 </div>
@@ -255,7 +255,7 @@ export default function PaymentDetails() {
                                         onChange={handleInputChange}
                                         placeholder="Enter Your Full Name"
                                         className="pl-12 md:text-lg w-full border border-gray-300 rounded-md p-2 focus:outline-[#ff8906]"
-                                        disabled={user?.fullname != null}
+                                        disabled={user?.fullname != ""}
                                         required
                                     />
                                 </div>
@@ -272,7 +272,7 @@ export default function PaymentDetails() {
                                         onChange={handleInputChange}
                                         placeholder="Enter Your Address"
                                         className="pl-12 md:text-lg w-full border border-gray-300 rounded-md p-2 focus:outline-[#ff8906]"
-                                        disabled={user?.address != null}
+                                        disabled={user?.address != ""}
                                         required
                                     />
                                 </div>

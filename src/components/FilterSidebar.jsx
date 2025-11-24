@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { Filter, X, Search, RotateCcw, Tag, ArrowUpDown, DollarSign } from 'lucide-react';
 
-export default function FilterSidebar({ className, search, total, setSearch, setProducts }) {
+export default function FilterSidebar({ className, search, total, setSearch, setProducts, page, settotPage }) {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedSort, setSelectedSort] = useState(null);
     const [range, setRange] = useState([20000, 50000]);
@@ -88,12 +88,14 @@ export default function FilterSidebar({ className, search, total, setSearch, set
         }
 
         query += `&minPrice=${range[0]}&maxPrice=${range[1]}`;
+        console.log(range)
 
         setFilterParams(query);
 
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products${query}`);
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products${query}&limit=9&page=${page}`);
             setProducts(response.data.result || []);
+            settotPage(response.data.total_page)
         } catch (error) {
             console.error("Fetch Error:", error);
             setProducts([]);
@@ -104,7 +106,7 @@ export default function FilterSidebar({ className, search, total, setSearch, set
 
     useEffect(() => {
         fetchFilteredProducts();
-    }, [debouncedSearch, selectedCategories, selectedSort]);
+    }, [debouncedSearch, selectedCategories, selectedSort, page]);
 
     return (
         <div className={`bg-emerald-300 rounded-2xl shadow-lg border border-gray-200/50 p-6 space-y-8 ${className}`}>

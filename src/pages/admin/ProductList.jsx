@@ -16,20 +16,23 @@ const ProductList = () => {
     const { token } = useSelector(state => state.auth)
     const [openConfirm, setOpenConfirm] = useState(false);
     const [productDelete, setProductDelete] = useState({ id: 0, name: "" })
+    const [page, setPage] = useState(1)
+    const [totPage, setTotPage] = useState(1)
 
     const handleSearch = useCallback(async (search = "") => {
         setLoading(true);
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/admin/products?search=${search}&limit=5`,
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/admin/products?search=${search}&limit=5&page=${page}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setProducts(response.data.result || []);
+            setTotPage(response.data.totalPage)
         } catch (error) {
             console.error("Search failed:", error);
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, [token, page]);
 
     useEffect(() => {
         handleSearch("");
@@ -161,8 +164,9 @@ const ProductList = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-center p-6 text-sm text-gray-500 border-t gap-4">
                     <div className="flex items-center gap-2 flex-wrap justify-center">
                         <button className="hover:text-orange-500 px-2">Prev</button>
-                        {[].map((num) => (
+                        {(new Array(totPage)).map((num) => (
                             <button
+                                onClick={() => { setPage(page => page + 1) }}
                                 key={num}
                                 className={`w-7 h-7 rounded-md ${num === 1
                                     ? "bg-[#ff8906] text-white"

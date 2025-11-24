@@ -3,7 +3,7 @@ import React from 'react'
 import { Rating } from '../pages/landing/DetailProduct'
 import { useNavigate } from 'react-router'
 
-function ProductCard({ product }) {
+function ProductCard({ product, page }) {
     const navigate = useNavigate()
 
     const rp = (price) => {

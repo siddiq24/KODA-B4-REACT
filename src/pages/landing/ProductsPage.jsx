@@ -7,6 +7,7 @@ import FilterSidebar from '../../components/FilterSidebar';
 
 function ProductsPage() {
     const [page, setPage] = useState(1);
+    const [totpage, settotPage] = useState(1);
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(false);
@@ -69,8 +70,10 @@ function ProductsPage() {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products`);
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products?limit=9`);
+            console.log(response.data.total_page)
             setProducts(response.data.result || []);
+            settotPage(response.data.total_page)
         } catch (error) {
             console.error('Error fetching products:', error);
             setProducts([]);
@@ -212,7 +215,7 @@ function ProductsPage() {
                                     <Filter size={20} className="text-[#ff8906]" />
                                     <h3 className="font-bold text-lg text-gray-900">Filters</h3>
                                 </div>
-                                <FilterSidebar search={search} setSearch={setSearch} setProducts={setProducts} />
+                                <FilterSidebar search={search} setSearch={setSearch} setProducts={setProducts} page={page} settotPage={settotPage} />
                             </div>
                         </div>
 
@@ -254,16 +257,16 @@ function ProductsPage() {
                                             <ArrowRight className="rotate-180" size={20} />
                                         </button>
 
-                                        {[1, 2, 3, 4].map(i => (
+                                        {[...Array(totpage)].map((i, p) => (
                                             <button
                                                 key={i}
-                                                onClick={() => setPage(i)}
-                                                className={`w-12 h-12 rounded-xl font-semibold transition-all duration-300 ${page === i
+                                                onClick={() => setPage(p + 1)}
+                                                className={`w-12 h-12 rounded-xl font-semibold transition-all duration-300 ${page === p + 1
                                                     ? 'bg-gradient-to-r from-[#ff8906] to-orange-500 text-white shadow-lg scale-110'
                                                     : 'bg-white border border-gray-200 hover:border-[#ff8906] text-gray-600 hover:text-[#ff8906]'
                                                     }`}
                                             >
-                                                {i}
+                                                {p + 1}
                                             </button>
                                         ))}
 
