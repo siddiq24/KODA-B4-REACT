@@ -1,14 +1,14 @@
-import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { Filter, X, Search, RotateCcw, Tag, ArrowUpDown, DollarSign } from 'lucide-react';
+import { useNavigate } from "react-router";
 
-export default function FilterSidebar({ className, search, total, setSearch, setProducts, page, settotPage }) {
+export default function FilterSidebar({ className, search, total, setSearch, setProducts }) {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedSort, setSelectedSort] = useState(null);
     const [range, setRange] = useState([20000, 50000]);
     const [loading, setLoading] = useState(false);
-    const [filterParams, setFilterParams] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState(search);
+    const navigate = useNavigate()
 
     const categories = [
         "Coffee", "Non Coffee", "Fruit Tea",
@@ -28,7 +28,10 @@ export default function FilterSidebar({ className, search, total, setSearch, set
         setSelectedCategories([]);
         setSelectedSort(null);
         setRange([20000, 50000]);
-        setFilterParams("");
+        navigate({
+            pathname: "/products",
+            redirect: true
+        })
     };
 
     const rangeRef = useRef(null);
@@ -68,7 +71,7 @@ export default function FilterSidebar({ className, search, total, setSearch, set
         return () => clearTimeout(delay);
     }, [search]);
 
-    const fetchFilteredProducts = async () => {
+    const FilterBottom = async () => {
         setLoading(true);
 
         let query = `?search=${encodeURIComponent(debouncedSearch)}`;
@@ -90,12 +93,8 @@ export default function FilterSidebar({ className, search, total, setSearch, set
         query += `&minPrice=${range[0]}&maxPrice=${range[1]}`;
         console.log(range)
 
-        setFilterParams(query);
-
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products${query}&limit=9&page=${page}`);
-            setProducts(response.data.result || []);
-            settotPage(response.data.total_page)
+            navigate(`/products${query}&limit=9`)
         } catch (error) {
             console.error("Fetch Error:", error);
             setProducts([]);
@@ -103,10 +102,6 @@ export default function FilterSidebar({ className, search, total, setSearch, set
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchFilteredProducts();
-    }, [debouncedSearch, selectedCategories, selectedSort, page]);
 
     return (
         <div className={`bg-emerald-300 rounded-2xl shadow-lg border border-gray-200/50 p-6 space-y-8 ${className}`}>
@@ -288,7 +283,7 @@ export default function FilterSidebar({ className, search, total, setSearch, set
 
             {/* Apply Button */}
             <button
-                onClick={fetchFilteredProducts}
+                onClick={FilterBottom}
                 disabled={loading}
                 className={`
                     w-full py-4 rounded-xl font-semibold text-white transition-all duration-300

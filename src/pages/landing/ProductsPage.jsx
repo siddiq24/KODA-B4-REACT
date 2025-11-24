@@ -4,15 +4,22 @@ import ProductCard from '../../components/ProductCard';
 import axios from 'axios';
 import { FilterContext } from '../../context/filterContext';
 import FilterSidebar from '../../components/FilterSidebar';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 function ProductsPage() {
-    const [page, setPage] = useState(1);
     const [totpage, settotPage] = useState(1);
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(false);
     const [activePromo, setActivePromo] = useState(0);
     const { filterOpen, setFilterOpen } = useContext(FilterContext);
+    const [next, setNext] = useState("")
+    const [prev, setPrev] = useState("")
+    const [searchParams, setSearchParams] = useSearchParams()
+    const page = parseInt(searchParams.get("page")) || 1;
+    console.log("page", page)
+    const navigate = useNavigate()
+
 
     const promos = [
         {
@@ -67,13 +74,17 @@ function ProductsPage() {
         }
     ];
 
-    const fetchProducts = async () => {
+    const fetchProducts = async (url = `${import.meta.env.VITE_BASE_URL}?limit=9`) => {
         setLoading(true);
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products?limit=9`);
-            console.log(response.data.total_page)
+            const response = await axios.get(url);
+            console.log(location.search)
+            console.log("Fetched products:", response.data);
             setProducts(response.data.result || []);
-            settotPage(response.data.total_page)
+            settotPage(response.data.total_page || 1);
+            setNext(response.data.next_page || "");
+            setPrev(response.data.prev_page || "");
+
         } catch (error) {
             console.error('Error fetching products:', error);
             setProducts([]);
@@ -83,15 +94,46 @@ function ProductsPage() {
     };
 
     useEffect(() => {
-        fetchProducts();
-    }, []);
+        fetchProducts(`${import.meta.env.VITE_BASE_URL}/products${location.search}`)
+    }, [location.search])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const currentSearch = searchParams.get("search") || "";
+            if (search !== currentSearch) {
+                const newParams = new URLSearchParams(searchParams);
+                if (search) {
+                    newParams.set("search", search);
+                } else {
+                    newParams.delete("search");
+                }
+                newParams.set("page", "1");
+                setSearchParams(newParams);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [search]);
 
     useEffect(() => {
         const timer = setInterval(() => {
             setActivePromo((prev) => (prev + 1) % promos.length);
         }, 5000);
         return () => clearInterval(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const handlePageChange = (newPage) => {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set("page", newPage.toString());
+        setSearchParams(newParams);
+    };
+
+    const handleResetFilters = () => {
+        setSearch("");
+        setSearchParams(new URLSearchParams());
+    };
 
     return (
         <div className='min-h-screen bg-gradient-to-br from-gray-50 to-white'>
@@ -124,9 +166,7 @@ function ProductsPage() {
                                     <input
                                         type="text"
                                         value={search}
-                                        onChange={(e) => {
-                                            setSearch(e.target.value)
-                                        }}
+                                        onChange={(e) => setSearch(e.target.value)}
                                         placeholder='Find your favorite coffee...'
                                         className='w-full h-14 pl-12 pr-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-[#ff8906] focus:ring-2 focus:ring-[#ff8906]/20 outline-none transition-all text-lg'
                                     />
@@ -188,7 +228,7 @@ function ProductsPage() {
 
             <section className='py-8 px-4 md:px-8 pb-20'>
                 <div className='max-w-8xl mx-auto'>
-                    <div className='flex items-center justify-between mb-8 w-[40%'>
+                    <div className='flex items-center justify-between mb-8 w-[40%]'>
                         <div>
                             <h2 className='text-3xl md:text-4xl font-bold text-gray-900'>
                                 Our <span className='text-[#ff8906]'>Products</span>
@@ -210,12 +250,20 @@ function ProductsPage() {
                     <div className='flex flex-col lg:flex-row gap-8'>
                         {/* Filter Sidebar */}
                         <div className='w-130'>
-                            <div className="hidden md:block bg-white rounded-2xl shadow-lg border border-gray-200/50 sticky top-24 bottom-24    ">
+                            <div className="hidden md:block bg-white rounded-2xl shadow-lg border border-gray-200/50 sticky top-24">
                                 <div className="flex items-center gap-3 mb-6">
                                     <Filter size={20} className="text-[#ff8906]" />
                                     <h3 className="font-bold text-lg text-gray-900">Filters</h3>
                                 </div>
-                                <FilterSidebar search={search} setSearch={setSearch} setProducts={setProducts} page={page} settotPage={settotPage} />
+                                <FilterSidebar
+                                    search={search}
+                                    setSearch={setSearch}
+                                    setProducts={setProducts}
+                                    page={page}
+                                    setPage={(p) => handlePageChange(p)}
+                                    settotPage={settotPage}
+                                    total={products.length}
+                                />
                             </div>
                         </div>
 
@@ -234,10 +282,10 @@ function ProductsPage() {
                                         </div>
                                     ))}
                                 </div>
-                            ) : products.length > 0 ? (
+                            ) : products?.length > 0 ? (
                                 <>
                                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                                        {products.map(product => (
+                                        {products?.map(product => (
                                             <div key={product.id} className="transform hover:scale-105 transition-transform duration-300">
                                                 <ProductCard product={product} />
                                             </div>
@@ -247,20 +295,20 @@ function ProductsPage() {
                                     {/* Pagination */}
                                     <div className='flex justify-center items-center gap-4 mt-12'>
                                         <button
-                                            onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                                            disabled={page <= 1}
-                                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${page > 1
+                                            onClick={() => prev && navigate(new URL(prev).search)}
+                                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${prev
                                                 ? 'bg-gradient-to-r from-[#ff8906] to-orange-500 text-white hover:shadow-lg cursor-pointer'
                                                 : 'bg-gray-200 cursor-not-allowed'
                                                 }`}
+                                            disabled={!prev}
                                         >
                                             <ArrowRight className="rotate-180" size={20} />
                                         </button>
 
-                                        {[...Array(totpage)].map((i, p) => (
+                                        {[...Array(totpage)].map((_, p) => (
                                             <button
-                                                key={i}
-                                                onClick={() => setPage(p + 1)}
+                                                key={p}
+                                                onClick={() => handlePageChange(p + 1)}
                                                 className={`w-12 h-12 rounded-xl font-semibold transition-all duration-300 ${page === p + 1
                                                     ? 'bg-gradient-to-r from-[#ff8906] to-orange-500 text-white shadow-lg scale-110'
                                                     : 'bg-white border border-gray-200 hover:border-[#ff8906] text-gray-600 hover:text-[#ff8906]'
@@ -271,8 +319,12 @@ function ProductsPage() {
                                         ))}
 
                                         <button
-                                            onClick={() => setPage(prev => prev + 1)}
-                                            className="w-12 h-12 bg-gradient-to-r from-[#ff8906] to-orange-500 text-white rounded-xl flex items-center justify-center hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                                            onClick={() => next && navigate(new URL(next).search)}
+                                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${next
+                                                ? 'bg-gradient-to-r from-[#ff8906] to-orange-500 text-white hover:shadow-lg cursor-pointer'
+                                                : 'bg-gray-200 cursor-not-allowed'
+                                                }`}
+                                            disabled={!next}
                                         >
                                             <ArrowRight size={20} />
                                         </button>
@@ -288,10 +340,7 @@ function ProductsPage() {
                                         We couldn't find any products matching your criteria. Try adjusting your filters or search terms.
                                     </p>
                                     <button
-                                        onClick={() => {
-                                            setSearch('')
-                                            fetchProducts()
-                                        }}
+                                        onClick={handleResetFilters}
                                         className="mt-6 bg-gradient-to-r from-[#ff8906] to-orange-500 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                                     >
                                         Reset Filters
@@ -330,7 +379,7 @@ const PromoCarousel = ({ data, activeIndex, onSelect }) => {
         <section className="space-y-6">
             <div
                 ref={containerRef}
-                className="flex gap-6 w-full scroll-smooth  py-4 scrollbar-hide overflow-clip px-22 justify-center"
+                className="flex gap-6 w-full scroll-smooth py-4 scrollbar-hide overflow-x-auto px-22 justify-center"
             >
                 {data.map((item, i) => (
                     <div
